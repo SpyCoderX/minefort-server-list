@@ -1,4 +1,4 @@
-function minefortOnLoad(serverListElement) {
+function minefortOnLoad(serverListElement, aboutElement) {
     console.log('minefortOnLoad executing!');
     if (!serverListElement) {
         console.error('Server list element not found.');
@@ -222,7 +222,16 @@ function minefortOnLoad(serverListElement) {
                 serverListElement.innerHTML = '<div class="mc-color-c server-list-info">No servers found.</div>';
                 return;
             }
+            const total_servers = servers.length;
+            const total_players = servers.reduce((sum, server) => sum + (server.players?.online || 0), 0);
+            aboutElement.querySelector('.about-servers').innerHTML = total_servers;
+            aboutElement.querySelector('.about-players').innerHTML = total_players;
             serverListElement.innerHTML = servers.map(createServerItem).join("");
+            serverListElement.style.height = serverListElement.scrollHeight + "px";
+            serverListElement.addEventListener('transitionend', () => {
+                serverListElement.style.height = "auto"; // Reset height to auto after transition
+                serverListElement.style.overflow = "visible";
+            });
 
             // Attach all event listeners after DOM update
             // MOTD toggle
