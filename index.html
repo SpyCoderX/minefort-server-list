@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Minefort Server List</title>
+    <style>
+        body {
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #18191a 0%, #232526 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .glass-container {
+            background: rgba(20, 22, 28, 0.85);
+            box-shadow: 0 8px 32px 0 rgba(10, 12, 20, 0.5);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.10);
+            padding: 2rem 3rem;
+            color: #fff;
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 {
+            margin-top: 0;
+            font-size: 2rem;
+            letter-spacing: 1px;
+        }
+        .about {
+            margin-top: 1.5rem;
+            font-size: 1.1rem;
+            color: #b0b3b8;
+        }
+        .server-list {
+            margin-top: 2rem;
+            text-align: left;
+        }
+        .server-list h2 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: #e4e6eb;
+        }
+        .server-item {
+            background: rgba(36, 37, 42, 0.85);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px 0 rgba(0,0,0,0.15);
+        }
+        .server-name {
+            font-weight: bold;
+            color: #f3f4f6;
+        }
+        .server-desc {
+            color: #b0b3b8;
+            font-size: 0.98rem;
+        }
+
+        /* Minecraft legacy color codes */
+        .mc-color-0 { color: #000000; } /* Black */
+        .mc-color-1 { color: #0000AA; } /* Dark Blue */
+        .mc-color-2 { color: #00AA00; } /* Dark Green */
+        .mc-color-3 { color: #00AAAA; } /* Dark Aqua */
+        .mc-color-4 { color: #AA0000; } /* Dark Red */
+        .mc-color-5 { color: #AA00AA; } /* Dark Purple */
+        .mc-color-6 { color: #FFAA00; } /* Gold */
+        .mc-color-7 { color: #AAAAAA; } /* Gray */
+        .mc-color-8 { color: #555555; } /* Dark Gray */
+        .mc-color-9 { color: #5555FF; } /* Blue */
+        .mc-color-a { color: #55FF55; } /* Green */
+        .mc-color-b { color: #55FFFF; } /* Aqua */
+        .mc-color-c { color: #FF5555; } /* Red */
+        .mc-color-d { color: #FF55FF; } /* Light Purple */
+        .mc-color-e { color: #FFFF55; } /* Yellow */
+        .mc-color-f { color: #FFFFFF; } /* White */
+
+        /* Minecraft formatting codes */
+        .mc-bold { font-weight: bold; }
+        .mc-italic { font-style: italic; }
+        .mc-underline { text-decoration: underline; }
+        .mc-strikethrough { text-decoration: line-through; }
+        .mc-obfuscated { /* Optionally, add obfuscated effect */ }
+
+        /* Minecraft hex color codes (component system) */
+        .mc-hex {
+            /* Usage: <span class="mc-hex" style="color:#RRGGBB">text</span> */
+        }
+    </style>
+</head>
+<body>
+    <div class="glass-container">
+        <h1>Minefort Server List</h1>
+        <div class="about">
+            <!-- About me and website explanation will go here -->
+        </div>
+        <div class="server-list" id="server-list">
+            <h2>Servers</h2>
+            <!-- Server list will be filled by JavaScript -->
+        </div>
+    </div>
+    <script src="onload.js"></script>
+    <script>
+      window.addEventListener('DOMContentLoaded', function() {
+        if (typeof minefortOnLoad === 'function') {
+          minefortOnLoad(document.getElementById('server-list'));
+        }
+      });
+    </script>
+</body>
+</html>
