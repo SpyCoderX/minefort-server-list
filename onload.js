@@ -65,10 +65,10 @@ function minefortOnLoad(serverListElement) {
         });
         data = await res.json();
         console.log('Second API response:', data);
-        if (data.servers && Array.isArray(data.servers)) {
-            return data.servers;
+        if (data.result && Array.isArray(data.result)) {
+            return data.result;
         } else {
-            console.warn('No servers array found in API response:', data);
+            console.warn('No result array found in API response:', data);
             return [];
         }
     }
