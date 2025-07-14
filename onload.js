@@ -29,7 +29,7 @@ function minefortOnLoad(serverListElement) {
     };
 
     async function fetchServers() {
-        const url = "https://api.minefort.com/v1/servers/list";
+        const url = "https://minefort-server-list-backend.onrender.com/api/servers";
         let payload = {
             pagination: { skip: 0, limit: 1 },
             sort: { field: "players.online", order: "desc" }
