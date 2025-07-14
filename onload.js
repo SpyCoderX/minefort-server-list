@@ -1,3 +1,70 @@
+const plans = {
+    10: "Hut (free)",
+    35: "Cottage (T1)",
+    50: "House (T2)",
+    100: "Mansion (T3)",
+    200: "Fort (T4)"
+};
+const rawColorValues = [
+    [90, 90, 100],   // Hut (darker gray)
+    [100, 100, 10],  // Cottage (darker yellow)
+    [120, 80, 10],  // House (darker orange)
+    [120, 20, 10],   // Mansion (darker red)
+    [41, 98, 150]    // Fort (darker blue)
+];
+// Plan and state mappings
+
+const states = {
+    0: "Sleeping",
+    1: "Uploading",
+    2: "Downloading",
+    3: "Starting",
+    4: "Online",
+    5: "Offline",
+    6: "Creating backup",
+    7: "Restoring backup",
+    8: "Stopping",
+    9: "Locked"
+};
+// Plan details arrays
+const plan_costs = [0, 5.99, 11.49, 23.99, 47.99];
+const plan_ram = [1, 2, 4, 8, 12]; // in GB
+const plan_storage = [10, 20, 40, 80, 120]; // in GB SSD
+const plan_backups = [1, 3, 5, 7, 15];
+// Solid colors for each plan tier (normal and hover) (made procedurally from rawColorValues)
+const planColors = rawColorValues.map(color => `rgba(${color.join(",")},0.32)`);
+const planColorsHover = rawColorValues.map(color => `rgba(${color.join(",")},0.64)`);
+const glowColors = rawColorValues.map(color => `rgba(${color.map(a => a*2).join(",")}, 0.12)`)
+const glowColorsHover = rawColorValues.map(color => `rgba(${color.map(a => a*2).join(",")}, 0.24)`)
+const glowColorsLegend = rawColorValues.map(color => `rgba(${color.map(a => a*2).join(",")}, 0.40)`)
+
+function buildLegend(legendElement) {
+    if (!legendElement) {
+        console.error('Legend element not found.');
+        return;
+    }
+    legendElement.innerHTML = Object.entries(plans).map(([key, name], index) => {
+        const color = planColors[index] || 'rgba(0,0,0,0.1)';
+        return `<div class="plan-legend-item" style="background: ${color}; box-shadow: 0 4px 16px 0 rgba(0,0,0,0.50), 0 0 0 1px rgba(255,255,255,0.30), inset 0 0 8px 2px ${glowColorsLegend[index]}, inset 0 0 32px 4px ${glowColorsLegend[index]};">
+            <h3 class="plan-name">${name}</h3>
+            <div class="plan-details">
+            <div class="plan-left">
+            <span class="plan-cost">Cost:</span>
+            <span class="plan-ram">RAM:</span>
+            <span class="plan-storage">Storage:</span>
+            <span class="plan-backups">Backups:</span>
+            </div>
+            <div class="plan-right">
+            <span class="plan-cost-value">$${plan_costs[index]}</span>
+            <span class="plan-ram-value">${plan_ram[index]} GB</span>
+            <span class="plan-storage-value">${plan_storage[index]} GB SSD</span>
+            <span class="plan-backups-value">${plan_backups[index]} backups</span>
+            </div>
+            </div>
+        </div>`;
+    }).join("");
+}
+
 function minefortOnLoad(serverListElement, aboutElement) {
     console.log('minefortOnLoad executing!');
     if (!serverListElement) {
@@ -6,31 +73,7 @@ function minefortOnLoad(serverListElement, aboutElement) {
     }
     serverListElement.innerHTML = '<p>Server list is loading...</p>';
 
-    // Plan and state mappings
-    const plans = {
-        10: "Hut (free)",
-        35: "Cottage (T1)",
-        50: "House (T2)",
-        100: "Mansion (T3)",
-        200: "Fort (T4)"
-    };
-    const states = {
-        0: "Sleeping",
-        1: "Uploading",
-        2: "Downloading",
-        3: "Starting",
-        4: "Online",
-        5: "Offline",
-        6: "Creating backup",
-        7: "Restoring backup",
-        8: "Stopping",
-        9: "Locked"
-    };
-    // Plan details arrays
-    const plan_costs = [0, 5.99, 11.49, 23.99, 47.99];
-    const plan_ram = [1, 2, 4, 8, 12]; // in GB
-    const plan_storage = [10, 20, 40, 80, 120]; // in GB SSD
-    const plan_backups = [1, 3, 5, 7, 15];
+    
 
     async function fetchServers() {
         const url = "https://minefort-server-list-backend.onrender.com/api/servers";
@@ -141,18 +184,7 @@ function minefortOnLoad(serverListElement, aboutElement) {
         const versionNum = version[1] || '';
         const serverId = server.serverId || '';
         const userId = server.userId || '';
-        const rawColorValues = [
-            [90, 90, 100],   // Hut (darker gray)
-            [100, 100, 10],  // Cottage (darker yellow)
-            [120, 80, 10],  // House (darker orange)
-            [120, 20, 10],   // Mansion (darker red)
-            [41, 98, 150]    // Fort (darker blue)
-        ];
-        // Solid colors for each plan tier (normal and hover) (made procedurally from rawColorValues)
-        const planColors = rawColorValues.map(color => `rgba(${color.join(",")},0.32)`);
-        const planColorsHover = rawColorValues.map(color => `rgba(${color.join(",")},0.64)`);
-        const glowColors = rawColorValues.map(color => `rgba(${color.map(a => a*2).join(",")}, 0.12)`)
-        const glowColorsHover = rawColorValues.map(color => `rgba(${color.map(a => a*2).join(",")}, 0.24)`)
+        
         const planTier = planIndex !== -1 ? planIndex : 0;
         // Plan expandable in glassmorphic div, button themed, section glassy
         const iconImg = icon.image ? `<img src="${icon.image}" style="width: 32px; height: 32px; padding: 5px; box-shadow: 0 2px 4px 2px rgba(0,0,0,0.3);" alt="icon" />` : '';
@@ -232,6 +264,7 @@ function minefortOnLoad(serverListElement, aboutElement) {
                 serverListElement.style.height = "auto"; // Reset height to auto after transition
                 serverListElement.style.overflow = "visible";
             });
+
 
             // Attach all event listeners after DOM update
             // MOTD toggle

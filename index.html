@@ -23,6 +23,50 @@
             display: none; /* Chrome, Safari */
         }
 
+        .plan-legend {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            max-height: fit-content;
+            text-align: center;
+            gap: 1rem;
+        }
+        .plan-legend-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            max-height: fit-content;
+            text-align: center;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 12px;
+        }
+        .plan-details {
+            display: flex;
+            /* flex-direction: column; */
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 1rem;
+        }
+        .plan-left {
+            display: flex;
+            flex-direction: column;
+            align-items: left;
+            text-align: left;
+            left: 0;
+        }
+        .plan-right {
+            display: flex;
+            flex-direction: column;
+            align-items: right;
+            text-align: right;
+            right: 0;
+        }
+
         .about {
             background: rgba(20, 22, 60, 0.65);
             box-shadow: 0 0 32px 8px rgba(10, 12, 20, 0.9);
@@ -327,24 +371,30 @@
 <body>
     <div class="glass-container">
         <h1>Minefort Server List</h1>
-        <div class="about" id="about">
-            <div class="about-stats">
-                <div>Servers <span class="about-servers mc-color-9">...</span></div>
-                <div>Players <span class="about-players mc-color-9">...</span></div>
+        <div class="info">
+            <div class="about" id="about">
+                <div class="about-stats">
+                    <div>Servers <span class="about-servers mc-color-9">...</span></div>
+                    <div>Players <span class="about-players mc-color-9">...</span></div>
+                </div>
+
+                <div class="about-text">
+                    <p>This is an improved Minefort server list.</p>
+                    <p>It includes features like MOTDs, player counts, and version!</p>
+                    <br>
+                    <p>Click on a server to copy its IP address.</p>
+                    <br>
+                    <p>This works through Minefort's API, just like the official server list.</p>
+                </div>
+
+                <div class="about-info">
+                    <div class="about-version">Version: <span class="mc-color-6">1.1.1</span></div>
+                    <div class="about-creator">Created by <a class="mc-color-9" href="https://github.com/SpyCoderX">SpyCoderX</a></div>
+                </div>
             </div>
 
-            <div class="about-text">
-                <p>This is an improved Minefort server list.</p>
-                <p>It includes features like MOTDs, player counts, and version!</p>
-                <br>
-                <p>Click on a server to copy its IP address.</p>
-                <br>
-                <p>This works through Minefort's API, just like the official server list.</p>
-            </div>
-
-            <div class="about-info">
-                <div class="about-version">Version: <span class="mc-color-6">1.1.1</span></div>
-                <div class="about-creator">Created by <a class="mc-color-9" href="https://github.com/SpyCoderX">SpyCoderX</a></div>
+            <div class="plan-legend" id="plan-legend">
+                <!-- Legend for server plans filled in by JS -->
             </div>
         </div>
 
@@ -356,7 +406,8 @@
     <script>
       window.addEventListener('DOMContentLoaded', function() {
         if (typeof minefortOnLoad === 'function') {
-          minefortOnLoad(document.getElementById('server-list'),document.getElementById('about'));
+            buildLegend(document.getElementById('plan-legend'));
+            minefortOnLoad(document.getElementById('server-list'),document.getElementById('about'));
         }
         // // Delegate click for motd toggles
         // document.getElementById('server-list').addEventListener('click', function(e) {
