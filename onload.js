@@ -1,4 +1,3 @@
-
 function minefortOnLoad(serverListElement) {
     console.log('minefortOnLoad executing!');
     if (!serverListElement) {
@@ -73,6 +72,59 @@ function minefortOnLoad(serverListElement) {
         }
     }
 
+    // Colorize Minecraft MOTD (&-codes)
+    function colorizeMotd(motd) {
+        if (!motd) return '';
+        const colorMap = {
+            '0': 'mc-color-0', '1': 'mc-color-1', '2': 'mc-color-2', '3': 'mc-color-3',
+            '4': 'mc-color-4', '5': 'mc-color-5', '6': 'mc-color-6', '7': 'mc-color-7',
+            '8': 'mc-color-8', '9': 'mc-color-9', 'a': 'mc-color-a', 'b': 'mc-color-b',
+            'c': 'mc-color-c', 'd': 'mc-color-d', 'e': 'mc-color-e', 'f': 'mc-color-f'
+        };
+        const formatMap = {
+            'l': 'mc-bold', 'o': 'mc-italic', 'n': 'mc-underline', 'm': 'mc-strikethrough'
+        };
+        let openTags = [];
+        let out = '';
+        let i = 0;
+        while (i < motd.length) {
+            if ((motd[i] === '&' || motd[i] === '§') && i + 1 < motd.length) {
+                const code = motd[i + 1].toLowerCase();
+                if (colorMap[code]) {
+                    // Close all open tags
+                    while (openTags.length) {
+                        out += '</span>';
+                        openTags.pop();
+                    }
+                    out += `<span class="${colorMap[code]}">`;
+                    openTags.push(colorMap[code]);
+                } else if (formatMap[code]) {
+                    out += `<span class="${formatMap[code]}">`;
+                    openTags.push(formatMap[code]);
+                } else if (code === 'r') {
+                    // Reset: close all
+                    while (openTags.length) {
+                        out += '</span>';
+                        openTags.pop();
+                    }
+                }
+                i += 2;
+                continue;
+            }
+            if (motd[i] === '\n') {
+                out += '<br>';
+            } else {
+                out += motd[i];
+            }
+            i++;
+        }
+        while (openTags.length) {
+            out += '</span>';
+            openTags.pop();
+        }
+        return out;
+    }
+
     function createServerItem(server) {
         const players = server.players || {};
         const planKey = players.max;
@@ -82,47 +134,115 @@ function minefortOnLoad(serverListElement) {
         const ram = planIndex !== -1 ? plan_ram[planIndex] : '?';
         const storage = planIndex !== -1 ? plan_storage[planIndex] : '?';
         const backups = planIndex !== -1 ? plan_backups[planIndex] : '?';
-        const stateName = states[server.state] || "Unknown";
         const icon = server.serverIcon || {};
         const motd = server.messageOfTheDay || '';
-        const version = server.version || '';
+        const version = server.version.split("-") || [];
+        const versionType = version[0] || 'Unknown';
+        const versionNum = version[1] || '';
         const serverId = server.serverId || '';
         const userId = server.userId || '';
-        return `
-        <div class="server-item">
-            <div class="server-name">${server.serverName || server.name}</div>
-            <div class="server-desc">
-                <span class="mc-color-7"><b>ServerId:</b></span> <code>${serverId}</code><br>
-                <span class="mc-color-7"><b>UserId:</b></span> <code>${userId}</code><br>
-                <span class="mc-color-7"><b>Version:</b></span> <code>${version}</code><br>
-                <span class="mc-color-b"><b>State:</b></span> <span class="mc-color-f">${stateName}</span><br>
-                ${icon.image ? `<span class="mc-color-7"><b>Icon:</b></span> ${icon.name} (item: ${icon.item}) <img src="${icon.image}" width="20" height="20" /> <br>` : ''}
-                <span class="mc-color-7"><b>MOTD:</b></span> <code>${motd}</code><br>
-                <span class="mc-color-6"><b>Plan:</b></span> <span class="mc-color-f">${planName}</span><br>
-                <span class="mc-color-6"><b>Plan cost:</b></span> $<span class="mc-color-f">${planCost}</span><br>
-                <span class="mc-color-6"><b>RAM:</b></span> <span class="mc-color-f">${ram} GB</span><br>
-                <span class="mc-color-6"><b>Storage:</b></span> <span class="mc-color-f">${storage} GB SSD</span><br>
-                <span class="mc-color-6"><b>Backups:</b></span> <span class="mc-color-f">${backups}</span><br>
-                <span class="mc-color-a"><b>Players Online:</b></span> <span class="mc-color-f">${players.online ?? '?'}</span> / <span class="mc-color-7">${players.max ?? '?'}</span>
+        const rawColorValues = [
+            [90, 90, 100],   // Hut (darker gray)
+            [100, 100, 10],  // Cottage (darker yellow)
+            [120, 80, 10],  // House (darker orange)
+            [120, 20, 10],   // Mansion (darker red)
+            [41, 98, 150]    // Fort (darker blue)
+        ];
+        // Solid colors for each plan tier (normal and hover) (made procedurally from rawColorValues)
+        const planColors = rawColorValues.map(color => `rgba(${color.join(",")},0.32)`);
+        const planColorsHover = rawColorValues.map(color => `rgba(${color.join(",")},0.64)`);
+        const glowColors = rawColorValues.map(color => `rgba(${color.map(a => a*2).join(",")}, 0.12)`)
+        const glowColorsHover = rawColorValues.map(color => `rgba(${color.map(a => a*2).join(",")}, 0.24)`)
+        const planTier = planIndex !== -1 ? planIndex : 0;
+        // Plan expandable in glassmorphic div, button themed, section glassy
+        const iconImg = icon.image ? `<img src="${icon.image}" style="width: 32px; height: 32px; padding: 5px; box-shadow: 0 2px 4px 2px rgba(0,0,0,0.3);" alt="icon" />` : '';
+        const copyIpBtn = `<button class="copy-ip-btn" title="Copy IP"><svg style="filter: drop-shadow(0px 0px 4px rgba(255,255,255, 1));" width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M208 0L332.1 0c12.7 0 24.9 5.1 33.9 14.1l67.9 67.9c9 9 14.1 21.2 14.1 33.9L448 336c0 26.5-21.5 48-48 48l-192 0c-26.5 0-48-21.5-48-48l0-288c0-26.5 21.5-48 48-48zM48 128l80 0 0 64-64 0 0 256 192 0 0-32 64 0 0 48c0 26.5-21.5 48-48 48L48 512c-26.5 0-48-21.5-48-48L0 176c0-26.5 21.5-48 48-48z"/></svg></button>`;
+        const topRow = `<div class="server-top">
+            ${iconImg}
+            <span class="server-name">${server.serverName || server.name}</span>
+            ${copyIpBtn}
+        </div>`;
+        const motdSection = `<div class="motd-glass">
+            <span>${colorizeMotd(motd)}</span>
+        </div>`;
+        const bottomRow = `<div class="server-bottom">
+            <div>
+                <span class="glow-2" style="font-weight:600;font-size:1em;">${versionType}</span>
+                ${versionNum ? `<span class="glow-3" style="font-size:0.97em;color:#b0b3b8;">${versionNum}</span>` : ''}
             </div>
-        </div>
+            <div class="glow-2" style="font-weight:600;font-size:1em;"><p>${players.online ?? '?'} <span class="glow-3 mc-color-7">/ ${players.max ?? '?'}</span></p></div>
+        </div>`;
+        const uniqueId = `server-item-${serverId}`;
+        const styleBlock = `
+          <style>
+            .${uniqueId} {
+              background: ${planColors[planTier]};
+              border-radius: 12px;
+              padding: 1.2rem 1.1rem 1.1rem 1.1rem;
+              box-shadow: 0 4px 16px 0 rgba(0,0,0,0.18), 0 0 0 1px rgba(255,255,255,0.08), inset 0 0 8px 2px rgba(255,255,255,0.13), inset 0 0 32px 4px rgba(80,180,255,0.08);
+              backdrop-filter: blur(12px);
+              -webkit-backdrop-filter: blur(12px);
+              display: flex;
+              flex-direction: column;
+              position: relative;
+              text-align: left;
+              transition: box-shadow 0.2s, transform 0.2s, background 0.2s;
+              overflow: hidden;
+              box-shadow:
+                0 4px 16px 0 rgba(0,0,0,0.18),
+                0 0 0 1px rgba(255,255,255,0.08),
+                inset 0 0 8px 2px ${glowColors[planTier]},
+                inset 0 0 32px 4px ${glowColors[planTier]};
+            }
+            .${uniqueId}:hover {
+              background: ${planColorsHover[planTier]};
+              box-shadow:
+                0 8px 16px 4px rgba(0,0,0,0.26),
+                0 0 0 1px rgba(255,255,255,0.08),
+                inset 0 0 4px 0px ${glowColorsHover[planTier]},
+                inset 0 0 16px 2px ${glowColorsHover[planTier]};
+            }
+          </style>
+        `;
+        return `
+          ${styleBlock}
+          <div class="server-item ${uniqueId}" data-plan-tier="${planTier}">
+              ${topRow}
+              ${motdSection}
+              ${bottomRow}
+          </div>
         `;
     }
 
     async function fillServerList() {
-        serverListElement.innerHTML = '<h2>Servers</h2><div class="mc-color-7">Loading...</div>';
+        serverListElement.innerHTML = '<div class="mc-color-7 server-list-info">Loading...</div>';
         try {
             const servers = await fetchServers();
             if (!servers.length) {
-                serverListElement.innerHTML = '<h2>Servers</h2><div class="mc-color-c">No servers found.</div>';
+                serverListElement.innerHTML = '<div class="mc-color-c server-list-info">No servers found.</div>';
                 return;
             }
-            serverListElement.innerHTML = '<h2>Servers</h2>' + servers.map(createServerItem).join("");
+            serverListElement.innerHTML = servers.map(createServerItem).join("");
+
+            // Attach all event listeners after DOM update
+            // MOTD toggle
+            serverListElement.querySelectorAll('.copy-ip-btn').forEach(item => {
+                const ip = item.closest('.server-item').querySelector('.server-name');
+                item.addEventListener('click', () => {
+                    navigator.clipboard.writeText(ip.textContent + '.minefort.com').then(() => {
+                        item.classList.add('copied');
+                        setTimeout(() => {
+                            item.classList.remove('copied');
+                        }, 400);
+                    });
+                });
+            });
         } catch (e) {
-            serverListElement.innerHTML = '<h2>Servers</h2><div class="mc-color-c">Failed to load servers.</div>';
+            serverListElement.innerHTML = '<div class="mc-color-c server-list-info">Failed to load servers.</div>';
             console.error('Error loading servers:', e);
         }
     }
 
     fillServerList();
 }
+
