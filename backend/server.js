@@ -27,6 +27,7 @@ async function refreshServerData() {
     });
 
     const data = await res.json();
+    console.log(`Fetched ${data.result.length} servers from Minefort API`);
 
     for (const server of data.result) {
       const serverName = server.serverName;
@@ -36,6 +37,7 @@ async function refreshServerData() {
         const rawPlayers = await getPlayerList(ip);
         for (const player of rawPlayers) {
           uuidNameCache.set(player.id, { name: player.name || null, lastSeen: Date.now() });
+          console.log(`Cached player ${player.name || player.id} (${player.id}) from ${ip}`);
           players = players.filter(p => p.uuid !== player.id); // Remove from rawPlayers if already cached
         }
       } catch (err) {
@@ -55,6 +57,7 @@ let rateLimitPauseCompleted = 0;
 
 setInterval(async () => {
   if (Date.now() < rateLimitPauseCompleted) {
+    console.log(`Rate limit pause active until ${new Date(rateLimitPauseCompleted).toLocaleTimeString()}`);
     return; // Skip if rate limit pause is active
   }
   const player = fallbackQueue.shift();
@@ -62,9 +65,11 @@ setInterval(async () => {
 
   const uuid = player.uuid || player.id;
   const name = await getPlayerDetails(uuid);
-  if (name && name.error === 'Rate limit exceeded') {
+  if (name?.error === 'Rate limit exceeded') {
     fallbackQueue.unshift(player); // Requeue if rate limit exceeded
     rateLimitPauseCompleted = Date.now() + 60_000; // Pause for 60 seconds
+    console.warn(`Rate limit exceeded for UUID "${uuid}", pausing for 60 seconds`);
+    return;
   }
   if (name) {
     uuidNameCache.set(uuid, { name, lastSeen: Date.now() });
@@ -220,35 +225,44 @@ async function getPlayerList(ip) {
 async function getJavaPlayerDetails(uuid) {
   try {
     const res = await fetch(`https://mcprofile.io/api/v1/java/uuid/${uuid}`);
-    if (!res.ok){
-      if (res.status !== 400) {
-        throw new Error(`MCProfile returned ${res.status}`);
-      }
-      // If 400, it means UUID not found, return null
-      return null;
+    
+    if (res.status === 429) {
+      console.warn(`Rate limit exceeded for UUID "${uuid}"`);
+      return { error: 'Rate limit exceeded', action: 'pause' };
     }
+
+    if (res.status === 400) {
+      return null; // UUID not found
+    }
+
+    if (!res.ok) {
+      throw new Error(`MCProfile returned ${res.status}`);
+    }
+
     const data = await res.json();
-    return data.username;
+    return { name: data.username };
   } catch (err) {
-    if (err.status === 429) {
-      console.warn(`Rate limit exceeded for UUID "${uuid}":`, err.message);
-      return {error: 'Rate limit exceeded', action: 'pause'}; // Handle rate limit by returning error
-    }
     console.warn(`Failed to resolve UUID "${uuid}":`, err.message);
     return null;
   }
 }
+
 async function getBedrockPlayerDetails(fuid) {
   try {
     const res = await fetch(`https://mcprofile.io/api/v1/bedrock/fuid/${fuid}`);
-    if (!res.ok) throw new Error(`MCProfile returned ${res.status}`);
-    const data = await res.json();
-    return '.' + data.gamertag;
-  } catch (err) {
-    if (err.status === 429) {
-      console.warn(`Rate limit exceeded for UUID "${uuid}":`, err.message);
-      return {error: 'Rate limit exceeded', action: 'pause'}; // Handle rate limit by returning error
+
+    if (res.status === 429) {
+      console.warn(`Rate limit exceeded for FUID "${fuid}"`);
+      return { error: 'Rate limit exceeded', action: 'pause' };
     }
+
+    if (!res.ok) {
+      throw new Error(`MCProfile returned ${res.status}`);
+    }
+
+    const data = await res.json();
+    return { name: '.' + data.gamertag };
+  } catch (err) {
     console.warn(`Failed to resolve FUID "${fuid}":`, err.message);
     return null;
   }
@@ -261,6 +275,7 @@ async function getPlayerDetails(id) {
     return await getJavaPlayerDetails(id);
   }
 }
+
 
 app.post('/api/servers', async (req, res) => {
   try {
