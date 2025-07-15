@@ -15,7 +15,7 @@ const server_cache = new Map();
 async function getPlayerList(ip) {
   try {
     const res = await status(ip, 25565, { timeout: 2000 });
-    console.log(`Pinged ${ip}: ${res.players.online} online`);
+    // console.log(`Pinged ${ip}: ${res.players.online} online`);
     return res.players.sample || [];
   } catch (err) {
     console.warn(`Failed to ping ${ip}:`, err.message);
@@ -23,6 +23,48 @@ async function getPlayerList(ip) {
   }
 }
 
+async function getJavaPlayerDetails(uuid) {
+  try {
+    const res = await fetch(`https://api.mcprofile.io/api/v1/java/uuid/${uuid}`);
+    if (!res.ok) throw new Error(`MCProfile returned ${res.status}`);
+    const data = await res.json();
+    return data.username;
+  } catch (err) {
+    console.warn(`Failed to resolve UUID "${uuid}":`, err.message);
+    return null;
+  }
+}
+async function getBedrockPlayerDetails(fuid) {
+  try {
+    const res = await fetch(`https://api.mcprofile.io/api/v1/bedrock/fuid/${fuid}`);
+    if (!res.ok) throw new Error(`MCProfile returned ${res.status}`);
+    const data = await res.json();
+    return '.' + data.gamertag;
+  } catch (err) {
+    console.warn(`Failed to resolve FUID "${fuid}":`, err.message);
+    return null;
+  }
+}
+
+async function getPlayerDetails(player) {
+  if (player.uuid.startsWith('00000000-')) {
+    return await getBedrockPlayerDetails(player.uuid);
+  } else if (player.fuid) {
+    return await getJavaPlayerDetails(player.uuid);
+  }
+  return null;
+}
+
+async function repairPlayer(player) {
+  if (!player) return null;
+
+  const details = await getPlayerDetails(player);
+  if (!details) return player;
+
+  player.name_clean = details;
+
+  return player;
+}
 
 app.post('/api/servers', async (req, res) => {
   try {
@@ -53,11 +95,23 @@ app.post('/api/servers', async (req, res) => {
 
         if (useCache) {
           // Use cached real players
-          server.players.list = cached.namedPlayers;
+          server.players.list = await Promise.all(server.players.list.map(async player => {
+            const cachedPlayer = cached.namedPlayers.find(p => p.uuid === player.uuid);
+            if (cachedPlayer) {
+              return {
+                ...player,
+                name_clean: cachedPlayer.name_clean
+              };
+            } else {
+              const repairedPlayer = await repairPlayer(player);
+              return repairedPlayer;
+            }
+          }));
+          return server;
         } else if (playerList.length > 0) {
           // Player list changed — fetch new data
           const ip = `${serverName}.minefort.com`;
-          const namedPlayers = await getPlayerList(ip);
+          const namedPlayers = (await getPlayerList(ip)) || playerList;
 
           // Save to cache
           server_cache.set(serverName, {
@@ -66,7 +120,15 @@ app.post('/api/servers', async (req, res) => {
           });
 
           // Replace list with detailed info
-          server.players.list = namedPlayers;
+          server.players.list = await Promise.all(server.players.list.map(async player => {
+            const namedPlayer = namedPlayers.find(p => p.uuid === player.uuid);
+            if (namedPlayer) {
+              return namedPlayer;
+            } else {
+              const repairedPlayer = await repairPlayer(player);
+              return repairedPlayer;
+            }
+          }));
         }
 
         return server;
