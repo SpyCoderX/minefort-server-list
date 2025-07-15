@@ -30,7 +30,7 @@ async function refreshServerData() {
         const rawPlayers = await getPlayerList(ip);
         for (const player of rawPlayers) {
           uuidNameCache.set(player.id, { name: player.name || null, lastSeen: Date.now() });
-          players = players.filter(p => p.id !== player.id); // Remove from rawPlayers if already cached
+          players = players.filter(p => p.uuid !== player.id); // Remove from rawPlayers if already cached
         }
       } catch (err) {
         console.warn(`Failed to ping ${ip}`);
@@ -50,8 +50,8 @@ setInterval(async () => {
   const player = fallbackQueue.shift();
   if (!player) return;
 
-  const uuid = player.id;
-  const name = await getPlayerDetails({ uuid });
+  const uuid = player.uuid || player.id;
+  const name = await getPlayerDetails(uuid);
   if (name) {
     uuidNameCache.set(uuid, { name, lastSeen: Date.now() });
   } else {
@@ -234,25 +234,14 @@ async function getBedrockPlayerDetails(fuid) {
   }
 }
 
-async function getPlayerDetails(player) {
-  if (player.uuid.startsWith('00000000-')) {
-    return await getBedrockPlayerDetails(player.uuid);
+async function getPlayerDetails(id) {
+  if (id.startsWith('00000000-')) {
+    return await getBedrockPlayerDetails(id);
   } else {
-    return await getJavaPlayerDetails(player.uuid);
+    return await getJavaPlayerDetails(id);
   }
 }
 
-async function repairPlayer(player) {
-  if (!player) return null;
-
-  const details = await getPlayerDetails(player);
-  if (!details) return player;
-
-  player.name = details;
-  player.state = "repaired";
-
-  return player;
-}
 app.post('/api/servers', async (req, res) => {
   try {
     const response = await fetch('https://api.minefort.com/v1/servers/list', {
