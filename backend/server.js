@@ -44,7 +44,7 @@ app.post('/api/servers', async (req, res) => {
         const cached = server_cache.get(serverName);
 
         let useCache = false;
-        if (cached && cached.minefortKey === minefortKey) {
+        if (cached && cached.minefortKey === minefortKey && cached.namedPlayers) {
           useCache = true;
         }
 
