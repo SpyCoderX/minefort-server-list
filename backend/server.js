@@ -8,8 +8,59 @@ app.use(cors());
 app.use(express.json());
 
 // Cache structure: Map<serverName, { minefortKey, namedPlayers }>
-const server_cache = new Map();
+const uuidNameCache = new Map(); // uuid -> { name, lastSeen }
+const fallbackQueue = [];        // [{ uuid, resolve, reject }]
 
+async function refreshServerData() {
+  try {
+    const res = await fetch('https://api.minefort.com/v1/servers/list', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ page: 1, limit: 100 })
+    });
+
+    const data = await res.json();
+
+    for (const server of data.result) {
+      const serverName = server.serverName;
+      const ip = `${serverName}.minefort.com`;
+      const players = server.player.list || [];
+      try {
+        const rawPlayers = await getPlayerList(ip);
+        for (const player of rawPlayers) {
+          uuidNameCache.set(player.id, { name: player.name || null, lastSeen: Date.now() });
+          players = players.filter(p => p.id !== player.id); // Remove from rawPlayers if already cached
+        }
+      } catch (err) {
+        console.warn(`Failed to ping ${ip}`);
+      }
+      players.forEach(player => {
+        fallbackQueue.push(player);
+      });
+
+    }
+
+  } catch (err) {
+    console.error("Failed to refresh server data:", err.message);
+  }
+}
+
+setInterval(async () => {
+  const player = fallbackQueue.shift();
+  if (!player) return;
+
+  const uuid = player.id;
+  const name = await getPlayerDetails({ uuid });
+  if (name) {
+    uuidNameCache.set(uuid, { name, lastSeen: Date.now() });
+  } else {
+    fallbackQueue.push(player); // Requeue if failed
+  }
+}, 1000); // 1 req/sec = 60/min (rate limit safety)
+
+
+// Run every 30 seconds
+setInterval(refreshServerData, 30_000);
 
 /**
  * Encode an integer as a VarInt (used by Minecraft protocol)
@@ -68,7 +119,7 @@ function readVarInt(socket) {
 /**
  * Ping a Minecraft Java Edition server manually
  */
-async function pingServer(ip, port = 25565, timeout = 1000, hostname = null) {
+async function pingServer(ip, port = 25565, timeout = 2000, hostname = null) {
   return new Promise((resolve, reject) => {
     const client = new net.Socket();
     let responseData = Buffer.alloc(0);
@@ -206,80 +257,30 @@ app.post('/api/servers', async (req, res) => {
   try {
     const response = await fetch('https://api.minefort.com/v1/servers/list', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify(req.body)
     });
 
     const data = await response.json();
 
-    for (let i = 0; i < data.result.length; i++) {
-      const server = data.result[i];
-      const serverName = server.serverName;
-      const playerList = server.players.list;
-
-      const minefortKey = JSON.stringify(playerList);
-      const cached = server_cache.get(serverName);
-
-      let useCache = false;
-      if (cached && cached.minefortKey === minefortKey && cached.finalPlayers) {
-        useCache = true;
-      }
-
-      if (useCache) {
-        console.log(`Using cached data for ${serverName}`);
-        server.players.list = [];
-        for (const player of playerList) {
-          const finalPlayer = cached.finalPlayers.find(p => p.uuid === player.uuid);
-          if (finalPlayer) {
-            player.name_clean = finalPlayer.name_clean;
-            player.state = "cached[" + finalPlayer.state + "]";
-          } else {
-            player.state = "cached[null]";
-          }
-          server.players.list.push(player);
+    data.result = data.result.map((server) => {
+      server.players.list = server.player.list.map((player) => {
+        const cached = uuidNameCache.get(player.id);
+        if (cached) {
+          return { ...player, name: cached.name, state: 'cache' };
         }
-      } else if (playerList.length > 0) {
-        console.log(`Fetching player list for ${serverName}...`);
-        const ip = `${serverName}.minefort.com`;
-        const namedPlayers = await getPlayerList(ip);
-        console.log(`Fetched ${namedPlayers.length} players for ${serverName}`);
+        fallbackQueue.push(player); // Push to deferred queue
+        return { ...player, name: null, state: 'queued' };
+      });
+      return server;
+    });
 
-        const finalPlayers = [];
-        for (const player of playerList) {
-          const namedPlayer = namedPlayers.find(p => p.id === player.uuid);
-          if (namedPlayer) {
-            namedPlayer.state = "named";
-            finalPlayers.push(namedPlayer);
-          } else {
-            const repairedPlayer = await repairPlayer(player);
-            finalPlayers.push(repairedPlayer);
-          }
-        }
-
-        server_cache.set(serverName, {
-          minefortKey,
-          finalPlayers
-        });
-        server.players.list = finalPlayers;
-      }
-
-      // Update back to the array
-      data.result[i] = server;
-    }
-    console.log(`Processed ${data.result.length} servers`);
-
-
-    res.set('Access-Control-Allow-Origin', '*');
     res.json(data);
-
   } catch (err) {
-    console.error("Server error:", err.message);
     res.status(500).json({ error: 'Proxy error', details: err.message });
   }
 });
+
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log('Proxy running on port', port));
