@@ -253,7 +253,6 @@ async function repairPlayer(player) {
 
   return player;
 }
-
 app.post('/api/servers', async (req, res) => {
   try {
     const response = await fetch('https://api.minefort.com/v1/servers/list', {
@@ -275,7 +274,7 @@ app.post('/api/servers', async (req, res) => {
       });
       return server;
     });
-
+    res.set('Access-Control-Allow-Origin', '*');
     res.json(data);
   } catch (err) {
     res.status(500).json({ error: 'Proxy error', details: err.message });
