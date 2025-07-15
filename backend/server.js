@@ -318,7 +318,7 @@ app.post('/api/servers', async (req, res) => {
 
     data.result = data.result.map((server) => {
       server.players.list = server.players.list.map((player) => {
-        const cached = uuidNameCache.get(player.id);
+        const cached = uuidNameCache.get(player.uuid);
         if (cached) {
           return { ...player, name: cached.name, state: 'cache' };
         }

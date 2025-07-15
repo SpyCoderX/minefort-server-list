@@ -193,7 +193,7 @@ async function minefortOnLoad(serverListElement, aboutElement) {
             <span>${colorizeMotd(motd)}</span>
         </div>`;
         const playerList = `<div class="player-list">
-            ${players.list.map(player => `<div class="player-icon" data-name="${player.name_clean || player.uuid}"><img src="https://avatars.minefort.com/avatar/${player.uuid}" width="24" height="24" alt="${player.uuid}" class="player-avatar" /></div>`).join('')}
+            ${players.list.map(player => `<div class="player-icon" data-name="${player.name || player.uuid}"><img src="https://avatars.minefort.com/avatar/${player.uuid}" width="24" height="24" alt="${player.uuid}" class="player-avatar" /></div>`).join('')}
         </div>`;
         const bottomRow = `<div class="server-bottom">
             <div>
