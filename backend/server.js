@@ -52,13 +52,21 @@ async function refreshServerData() {
     console.error("Failed to refresh server data:", err.message);
   }
 }
+let rateLimitPauseCompleted = 0;
 
 setInterval(async () => {
+  if (Date.now() < rateLimitPauseCompleted) {
+    return; // Skip if rate limit pause is active
+  }
   const player = fallbackQueue.shift();
   if (!player) return;
 
   const uuid = player.uuid || player.id;
   const name = await getPlayerDetails(uuid);
+  if (name && name.error === 'Rate limit exceeded') {
+    fallbackQueue.unshift(player); // Requeue if rate limit exceeded
+    rateLimitPauseCompleted = Date.now() + 60_000; // Pause for 60 seconds
+  }
   if (name) {
     uuidNameCache.set(uuid, { name, lastSeen: Date.now() });
   } else {
@@ -234,7 +242,10 @@ async function getJavaPlayerDetails(uuid) {
     const data = await res.json();
     return data.username;
   } catch (err) {
-
+    if (err.status === 429) {
+      console.warn(`Rate limit exceeded for UUID "${uuid}":`, err.message);
+      return {error: 'Rate limit exceeded', action: 'pause'}; // Handle rate limit by returning error
+    }
     console.warn(`Failed to resolve UUID "${uuid}":`, err.message);
     return null;
   }
@@ -246,6 +257,10 @@ async function getBedrockPlayerDetails(fuid) {
     const data = await res.json();
     return '.' + data.gamertag;
   } catch (err) {
+    if (err.status === 429) {
+      console.warn(`Rate limit exceeded for UUID "${uuid}":`, err.message);
+      return {error: 'Rate limit exceeded', action: 'pause'}; // Handle rate limit by returning error
+    }
     console.warn(`Failed to resolve FUID "${fuid}":`, err.message);
     return null;
   }
