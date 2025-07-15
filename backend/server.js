@@ -33,12 +33,15 @@ async function refreshServerData() {
       const serverName = server.serverName;
       const ip = `${serverName}.minefort.com`;
       let players = server.players.list || [];
-      console.log(`Processing server ${serverName} (${ip})`);
+      if (players.length === 0) {
+        break; // Once a server with no players is found, all subsequent servers will also have no players due to sorting.
+      }
+      // console.log(`Processing server ${serverName} (${ip})`);
       try {
         const rawPlayers = await getPlayerList(ip);
         for (const player of rawPlayers) {
           uuidNameCache.set(player.id, { name: player.name || null, lastSeen: Date.now() });
-          console.log(`Cached player ${player.name || player.id} (${player.id}) from ${ip}`);
+          // console.log(`Cached player ${player.name || player.id} (${player.id}) from ${ip}`);
           players = players.filter(p => p.uuid !== player.id); // Remove from rawPlayers if already cached
         }
       } catch (err) {
@@ -241,7 +244,7 @@ async function getPlayerList(ip) {
   try {
     const result = await pingServer(ip);
     if (!result || !result.players || !result.players.sample) {
-      throw new Error('Invalid server response');
+      throw new Error('Invalid server response: '+JSON.stringify(result));
     }
     console.log(`Fetched player list for ${ip}:`, result.players.sample);
     return result.players.sample || [];
