@@ -35,7 +35,7 @@ app.post('/api/servers', async (req, res) => {
     const data = await response.json();
 
     const enrichedServers = await Promise.all(
-      data.servers.map(async (server) => {
+      data.map(async (server) => {
         const serverName = server.serverName;
         const playerList = server.players?.list || [];
 
