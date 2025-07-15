@@ -27,6 +27,7 @@ async function refreshServerData() {
     });
 
     const data = await res.json();
+    console.log(`Fetched ${data.result.length} servers from Minefort API`);
 
     for (const server of data.result) {
       const serverName = server.serverName;
@@ -34,7 +35,6 @@ async function refreshServerData() {
       let players = server.players.list || [];
       try {
         const rawPlayers = await getPlayerList(ip);
-        console.log(`Fetched ${rawPlayers.length} players for ${ip}`);
         for (const player of rawPlayers) {
           uuidNameCache.set(player.id, { name: player.name || null, lastSeen: Date.now() });
           players = players.filter(p => p.uuid !== player.id); // Remove from rawPlayers if already cached
@@ -275,8 +275,7 @@ app.post('/api/servers', async (req, res) => {
         if (cached) {
           return { ...player, name: cached.name, state: 'cache' };
         }
-        fallbackQueue.push(player); // Push to deferred queue
-        return { ...player, name: null, state: 'queued' };
+        return { ...player, name: null, state: 'unknown' };
       });
       return server;
     });
