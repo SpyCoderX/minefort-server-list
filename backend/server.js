@@ -31,6 +31,9 @@ app.post('/api/servers', async (req, res) => {
       },
       body: JSON.stringify(req.body)
     });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch server list: ${response.statusText}`);
+    }
 
     const data = await response.json();
 
