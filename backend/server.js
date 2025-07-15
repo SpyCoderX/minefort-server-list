@@ -68,7 +68,7 @@ function readVarInt(socket) {
 /**
  * Ping a Minecraft Java Edition server manually
  */
-async function pingServer(ip, port = 25565, timeout = 3000, hostname = null) {
+async function pingServer(ip, port = 25565, timeout = 500, hostname = null) {
   return new Promise((resolve, reject) => {
     const client = new net.Socket();
     let responseData = Buffer.alloc(0);
@@ -196,7 +196,7 @@ async function repairPlayer(player) {
   const details = await getPlayerDetails(player);
   if (!details) return player;
 
-  player.name_clean = details;
+  player.name = details;
   player.state = "repaired";
 
   return player;
@@ -232,6 +232,7 @@ app.post('/api/servers', async (req, res) => {
         if (useCache) {
           // Use cached real players
           // The cache stores the repaired and named players in `cached.finalPlayers` as a merged list.
+          console.log(`Using cached data for ${serverName}`);
           server.players.list = await Promise.all(server.players.list.map(async player => {
             const finalPlayer = cached.finalPlayers.find(p => p.uuid === player.uuid);
             if (finalPlayer) {
@@ -243,16 +244,16 @@ app.post('/api/servers', async (req, res) => {
             return player;
           }));
         } else if (playerList.length > 0) {
+          console.log(`Fetching player list for ${serverName}...`);
           // Player list changed — fetch new data
           const ip = `${serverName}.minefort.com`;
           const namedPlayers = await getPlayerList(ip);
 
-          // Save to cache
-          
+          console.log(`Fetched ${namedPlayers.length} players for ${serverName}`);
 
           // Replace list with detailed info
           finalPlayers = await Promise.all(server.players.list.map(async player => {
-            const namedPlayer = namedPlayers.find(p => p.uuid === player.uuid);
+            const namedPlayer = namedPlayers.find(p => p.id === player.uuid);
             if (namedPlayer) {
               namedPlayer.state = "named";
               return namedPlayer;
