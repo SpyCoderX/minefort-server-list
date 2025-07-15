@@ -91,6 +91,7 @@ async function minefortOnLoad(serverListElement, aboutElement) {
             headers,
             body: JSON.stringify(payload)
         });
+        console.log('First API response:', res.body);
         let data = await res.json();
         console.log('First API response:', data);
         const total = data.pagination?.total || 0;

@@ -32,7 +32,13 @@ app.post('/api/servers', async (req, res) => {
     // Get server IPs from Minefort response
     enrichedServers = await Promise.all(
       data.servers.map(async (server) => {
-        if (server.players.online > 0 || (server_cache.has(server.serverName) && server_cache.get(server.serverName) === server.players.list)) {
+        const has_server = server_cache.has(server.serverName);
+        if (has_server) {
+          const isSame = server_cache.get(server.serverName) === server.players.list;
+        } else {
+          const isSame = false; // If the server is not in cache, it can't be the sameSer
+        }
+        if (!(has_server && isSame) && server.players.list.length > 0) {
           // Fallback to server.address if domain is unavailable
           const ip = server.serverName + ".minefort.com";
 
