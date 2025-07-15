@@ -27,7 +27,6 @@ async function refreshServerData() {
     });
 
     const data = await res.json();
-    console.log(`Fetched ${data.result.length} servers from Minefort API`);
 
     for (const server of data.result) {
       const serverName = server.serverName;
@@ -103,33 +102,22 @@ function writeString(str) {
 /**
  * Read a VarInt from the socket buffer
  */
-function readVarInt(socket) {
-  return new Promise((resolve, reject) => {
-    let result = 0;
-    let shift = 0;
-    let count = 0;
+function readVarInt(buffer, offset = 0) {
+  let num = 0;
+  let shift = 0;
+  let length = 0;
 
-    function readByte() {
-      socket.once('data', (chunk) => {
-        const byte = chunk[0];
-        result |= (byte & 0x7F) << shift;
+  while (true) {
+    if (offset + length >= buffer.length) throw new Error('Incomplete VarInt');
+    const byte = buffer[offset + length];
+    num |= (byte & 0x7F) << shift;
+    shift += 7;
+    length++;
+    if ((byte & 0x80) === 0) break;
+    if (length > 5) throw new Error('VarInt too big');
+  }
 
-        if ((byte & 0x80) !== 0x80) {
-          resolve(result);
-        } else {
-          shift += 7;
-          count++;
-          if (count > 5) {
-            reject(new Error('VarInt is too big'));
-          } else {
-            readByte();
-          }
-        }
-      });
-    }
-
-    readByte();
-  });
+  return { value: num, bytes: length };
 }
 
 /**
