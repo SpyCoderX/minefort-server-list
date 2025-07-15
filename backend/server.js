@@ -34,6 +34,7 @@ async function refreshServerData() {
       let players = server.players.list || [];
       try {
         const rawPlayers = await getPlayerList(ip);
+        console.log(`Fetched ${rawPlayers.length} players for ${ip}`);
         for (const player of rawPlayers) {
           uuidNameCache.set(player.id, { name: player.name || null, lastSeen: Date.now() });
           players = players.filter(p => p.uuid !== player.id); // Remove from rawPlayers if already cached
