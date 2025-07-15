@@ -13,6 +13,9 @@ const server_cache = new Map();
 async function getPlayerList(ip) {
   try {
     const res = await fetch(`https://api.mcstatus.io/v2/status/java/${ip}`);
+    if (!res.ok) {
+      throw new Error(`Failed to fetch player list for ${ip}: ${res.statusText}`);
+    }
     const data = await res.json();
     return data.players?.list || [];
   } catch (err) {
@@ -31,9 +34,6 @@ app.post('/api/servers', async (req, res) => {
       },
       body: JSON.stringify(req.body)
     });
-    if (!response.ok) {
-      throw new Error(`Failed to fetch server list: ${response.statusText}`);
-    }
 
     const data = await response.json();
 
