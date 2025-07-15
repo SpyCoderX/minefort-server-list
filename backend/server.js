@@ -127,7 +127,7 @@ function readVarInt(socket) {
  * Ping a Minecraft Java Edition server manually
  */
 
-async function pingServer(ipOrHostname, port = 25565, timeout = 500) {
+async function pingServer(ipOrHostname, port = 25565, timeout = 4000) {
   try {
     const { address } = await dns.lookup(ipOrHostname, { family: 4 });
     return internalPing(address, port, timeout, ipOrHostname); // hostname still used in handshake
