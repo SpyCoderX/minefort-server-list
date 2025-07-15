@@ -34,8 +34,8 @@ app.post('/api/servers', async (req, res) => {
 
     const data = await response.json();
 
-    const enrichedServers = await Promise.all(
-      data.map(async (server) => {
+    data.result = await Promise.all(
+      data.result.map(async (server) => {
         const serverName = server.serverName;
         const playerList = server.players?.list || [];
 
@@ -71,7 +71,7 @@ app.post('/api/servers', async (req, res) => {
     );
 
     res.set('Access-Control-Allow-Origin', '*');
-    res.json({ servers: enrichedServers });
+    res.json(data);
 
   } catch (err) {
     console.error("Server error:", err.message);
