@@ -25,7 +25,7 @@ async function getPlayerList(ip) {
 
 async function getJavaPlayerDetails(uuid) {
   try {
-    const res = await fetch(`https://api.mcprofile.io/api/v1/java/uuid/${uuid}`);
+    const res = await fetch(`https://mcprofile.io/api/v1/java/uuid/${uuid}`);
     if (!res.ok) throw new Error(`MCProfile returned ${res.status}`);
     const data = await res.json();
     return data.username;
@@ -36,7 +36,7 @@ async function getJavaPlayerDetails(uuid) {
 }
 async function getBedrockPlayerDetails(fuid) {
   try {
-    const res = await fetch(`https://api.mcprofile.io/api/v1/bedrock/fuid/${fuid}`);
+    const res = await fetch(`https://mcprofile.io/api/v1/bedrock/fuid/${fuid}`);
     if (!res.ok) throw new Error(`MCProfile returned ${res.status}`);
     const data = await res.json();
     return '.' + data.gamertag;
@@ -49,7 +49,7 @@ async function getBedrockPlayerDetails(fuid) {
 async function getPlayerDetails(player) {
   if (player.uuid.startsWith('00000000-')) {
     return await getBedrockPlayerDetails(player.uuid);
-  } else if (player.fuid) {
+  } else {
     return await getJavaPlayerDetails(player.uuid);
   }
   return null;
@@ -111,7 +111,7 @@ app.post('/api/servers', async (req, res) => {
         } else if (playerList.length > 0) {
           // Player list changed — fetch new data
           const ip = `${serverName}.minefort.com`;
-          const namedPlayers = (await getPlayerList(ip)) || playerList;
+          const namedPlayers = await getPlayerList(ip);
 
           // Save to cache
           server_cache.set(serverName, {
