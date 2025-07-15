@@ -129,13 +129,30 @@ function readVarInt(buffer, offset = 0) {
 /**
  * Ping a Minecraft Java Edition server manually
  */
+async function dnsLookupWithTimeout(hostname, timeoutMs = 2000) {
+  return Promise.race([
+    dns.lookup(hostname, { family: 4 }),
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('DNS lookup timed out')), timeoutMs)
+    )
+  ]);
+}
+
+function promiseTimeout(promise, ms) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Ping timed out')), ms)
+    )
+  ]);
+}
 
 async function pingServer(ipOrHostname, port = 25565, timeout = 4000) {
   try {
-    const { address } = await dns.lookup(ipOrHostname, { family: 4 });
-    return internalPing(address, port, timeout, ipOrHostname); // hostname still used in handshake
+    const { address } = await dnsLookupWithTimeout(ipOrHostname, 2000);
+    return await promiseTimeout(internalPing(address, port, timeout, ipOrHostname), timeout);
   } catch (err) {
-    throw new Error(`DNS resolution failed for ${ipOrHostname}: ${err.message}`);
+    throw new Error(`Ping failed for ${ipOrHostname}: ${err.message}`);
   }
 }
 
