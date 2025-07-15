@@ -65,7 +65,7 @@ function buildLegend(legendElement) {
     }).join("");
 }
 
-function minefortOnLoad(serverListElement, aboutElement) {
+async function minefortOnLoad(serverListElement, aboutElement) {
     console.log('minefortOnLoad executing!');
     if (!serverListElement) {
         console.error('Server list element not found.');
@@ -171,19 +171,13 @@ function minefortOnLoad(serverListElement, aboutElement) {
     function createServerItem(server) {
         const players = server.players || {};
         const planKey = players.max;
-        const planName = plans[planKey] || `Unknown: ${server.planId}`;
         const planIndex = Object.keys(plans).map(Number).indexOf(planKey);
-        const planCost = planIndex !== -1 ? plan_costs[planIndex] : '?';
-        const ram = planIndex !== -1 ? plan_ram[planIndex] : '?';
-        const storage = planIndex !== -1 ? plan_storage[planIndex] : '?';
-        const backups = planIndex !== -1 ? plan_backups[planIndex] : '?';
         const icon = server.serverIcon || {};
         const motd = server.messageOfTheDay || '';
         const version = server.version.split("-") || [];
         const versionType = version[0] || 'Unknown';
         const versionNum = version[1] || '';
         const serverId = server.serverId || '';
-        const userId = server.userId || '';
         
         const planTier = planIndex !== -1 ? planIndex : 0;
         // Plan expandable in glassmorphic div, button themed, section glassy
@@ -191,11 +185,14 @@ function minefortOnLoad(serverListElement, aboutElement) {
         const copyIpBtn = `<button class="copy-ip-btn" title="Copy IP"><svg style="filter: drop-shadow(0px 0px 4px rgba(255,255,255, 1));" width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M208 0L332.1 0c12.7 0 24.9 5.1 33.9 14.1l67.9 67.9c9 9 14.1 21.2 14.1 33.9L448 336c0 26.5-21.5 48-48 48l-192 0c-26.5 0-48-21.5-48-48l0-288c0-26.5 21.5-48 48-48zM48 128l80 0 0 64-64 0 0 256 192 0 0-32 64 0 0 48c0 26.5-21.5 48-48 48L48 512c-26.5 0-48-21.5-48-48L0 176c0-26.5 21.5-48 48-48z"/></svg></button>`;
         const topRow = `<div class="server-top">
             ${iconImg}
-            <span class="server-name">${server.serverName || server.name}</span>
+            <span class="server-name">${server.serverName}</span>
             ${copyIpBtn}
         </div>`;
         const motdSection = `<div class="motd-glass">
             <span>${colorizeMotd(motd)}</span>
+        </div>`;
+        const playerList = `<div class="player-list">
+            ${players.list.map(player => `<div class="player-icon" data-name="${player.nameClean || player.uuid}"><img src="https://avatars.minefort.com/avatar/${player.uuid}" width="24" height="24" alt="${player.uuid}" class="player-avatar" /></div>`).join('')}
         </div>`;
         const bottomRow = `<div class="server-bottom">
             <div>
@@ -212,14 +209,12 @@ function minefortOnLoad(serverListElement, aboutElement) {
               border-radius: 12px;
               padding: 1.2rem 1.1rem 1.1rem 1.1rem;
               box-shadow: 0 4px 16px 0 rgba(0,0,0,0.18), 0 0 0 1px rgba(255,255,255,0.08), inset 0 0 8px 2px rgba(255,255,255,0.13), inset 0 0 32px 4px rgba(80,180,255,0.08);
-              backdrop-filter: blur(12px);
-              -webkit-backdrop-filter: blur(12px);
               display: flex;
               flex-direction: column;
               position: relative;
               text-align: left;
               transition: box-shadow 0.2s, transform 0.2s, background 0.2s;
-              overflow: hidden;
+              overflow: visible;
               box-shadow:
                 0 4px 16px 0 rgba(0,0,0,0.18),
                 0 0 0 1px rgba(255,255,255,0.08),
@@ -239,9 +234,10 @@ function minefortOnLoad(serverListElement, aboutElement) {
         return `
           ${styleBlock}
           <div class="server-item ${uniqueId}" data-plan-tier="${planTier}">
-              ${topRow}
-              ${motdSection}
-              ${bottomRow}
+            ${topRow}
+            ${motdSection}
+            ${playerList}
+            ${bottomRow}
           </div>
         `;
     }
@@ -285,6 +281,6 @@ function minefortOnLoad(serverListElement, aboutElement) {
         }
     }
 
-    fillServerList();
+    await fillServerList();
 }
 
