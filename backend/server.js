@@ -265,7 +265,7 @@ app.post('/api/servers', async (req, res) => {
     const data = await response.json();
 
     data.result = data.result.map((server) => {
-      server.players.list = server.player.list.map((player) => {
+      server.players.list = server.players.list.map((player) => {
         const cached = uuidNameCache.get(player.id);
         if (cached) {
           return { ...player, name: cached.name, state: 'cache' };
