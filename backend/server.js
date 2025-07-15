@@ -1,6 +1,7 @@
 const express = require('express');
 const fetch = require('node-fetch');
 const cors = require('cors');
+const { status } = require('minecraft-server-util');
 
 const app = express();
 app.use(cors());
@@ -10,19 +11,18 @@ app.use(express.json());
 const server_cache = new Map();
 
 // Get real player list from mcstatus.io
+
 async function getPlayerList(ip) {
   try {
-    const res = await fetch(`https://api.mcstatus.io/v2/status/java/${ip}`);
-    if (!res.ok) {
-      throw new Error(`Failed to fetch player list for ${ip}: ${res.statusText}`);
-    }
-    const data = await res.json();
-    return data.players?.list || [];
+    const res = await status(ip, 25565, { timeout: 2000 });
+    console.log(`Pinged ${ip}: ${res.players.online} online`);
+    return res.players.sample || [];
   } catch (err) {
-    console.error(`Failed to fetch status for ${ip}:`, err.message);
+    console.warn(`Failed to ping ${ip}:`, err.message);
     return [];
   }
 }
+
 
 app.post('/api/servers', async (req, res) => {
   try {
