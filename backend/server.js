@@ -1,10 +1,16 @@
 const express = require('express');
 const fetch = require('node-fetch');
-const cors = require('cors');
 const net = require('net');
 
 const app = express();
-app.use(cors());
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Accept");
+  if (req.method === 'OPTIONS') return res.sendStatus(200); // Quick exit for preflight
+  next();
+});
+
 app.use(express.json());
 
 // Cache structure: Map<serverName, { minefortKey, namedPlayers }>
@@ -20,12 +26,12 @@ async function refreshServerData() {
     });
 
     const data = await res.json();
-    console.log(`Result: ${data.result}`)
+    console.log(`Data: ${data}`)
 
     for (const server of data.result) {
       const serverName = server.serverName;
       const ip = `${serverName}.minefort.com`;
-      const players = server.players.list || [];
+      let players = server.players.list || [];
       try {
         const rawPlayers = await getPlayerList(ip);
         for (const player of rawPlayers) {
@@ -243,6 +249,7 @@ async function getPlayerDetails(id) {
 }
 
 app.post('/api/servers', async (req, res) => {
+  console.log('Received request:', req.body);
   try {
     const response = await fetch('https://api.minefort.com/v1/servers/list', {
       method: 'POST',
