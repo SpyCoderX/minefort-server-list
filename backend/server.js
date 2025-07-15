@@ -68,7 +68,7 @@ function readVarInt(socket) {
 /**
  * Ping a Minecraft Java Edition server manually
  */
-async function pingServer(ip, port = 25565, timeout = 500, hostname = null) {
+async function pingServer(ip, port = 25565, timeout = 1000, hostname = null) {
   return new Promise((resolve, reject) => {
     const client = new net.Socket();
     let responseData = Buffer.alloc(0);
@@ -215,63 +215,62 @@ app.post('/api/servers', async (req, res) => {
 
     const data = await response.json();
 
-    data.result = await Promise.all(
-      data.result.map(async (server) => {
-        const serverName = server.serverName;
-        const playerList = server.players.list;
+    for (let i = 0; i < data.result.length; i++) {
+      const server = data.result[i];
+      const serverName = server.serverName;
+      const playerList = server.players.list;
 
-        // Create a simple hash key of current player list (e.g., length or join(','))
-        const minefortKey = JSON.stringify(playerList); // You could make this more compact
-        const cached = server_cache.get(serverName);
+      const minefortKey = JSON.stringify(playerList);
+      const cached = server_cache.get(serverName);
 
-        let useCache = false;
-        if (cached && cached.minefortKey === minefortKey && cached.finalPlayers) {
-          useCache = true;
-        }
+      let useCache = false;
+      if (cached && cached.minefortKey === minefortKey && cached.finalPlayers) {
+        useCache = true;
+      }
 
-        if (useCache) {
-          // Use cached real players
-          // The cache stores the repaired and named players in `cached.finalPlayers` as a merged list.
-          console.log(`Using cached data for ${serverName}`);
-          server.players.list = await Promise.all(server.players.list.map(async player => {
-            const finalPlayer = cached.finalPlayers.find(p => p.uuid === player.uuid);
-            if (finalPlayer) {
-              player.name_clean = finalPlayer.name_clean;
-              player.state = "cached["+finalPlayer.state+"]";
-              return player;
-            }
+      if (useCache) {
+        console.log(`Using cached data for ${serverName}`);
+        server.players.list = [];
+        for (const player of playerList) {
+          const finalPlayer = cached.finalPlayers.find(p => p.uuid === player.uuid);
+          if (finalPlayer) {
+            player.name_clean = finalPlayer.name_clean;
+            player.state = "cached[" + finalPlayer.state + "]";
+          } else {
             player.state = "cached[null]";
-            return player;
-          }));
-        } else if (playerList.length > 0) {
-          console.log(`Fetching player list for ${serverName}...`);
-          // Player list changed — fetch new data
-          const ip = `${serverName}.minefort.com`;
-          const namedPlayers = await getPlayerList(ip);
+          }
+          server.players.list.push(player);
+        }
+      } else if (playerList.length > 0) {
+        console.log(`Fetching player list for ${serverName}...`);
+        const ip = `${serverName}.minefort.com`;
+        const namedPlayers = await getPlayerList(ip);
+        console.log(`Fetched ${namedPlayers.length} players for ${serverName}`);
 
-          console.log(`Fetched ${namedPlayers.length} players for ${serverName}`);
-
-          // Replace list with detailed info
-          finalPlayers = await Promise.all(server.players.list.map(async player => {
-            const namedPlayer = namedPlayers.find(p => p.id === player.uuid);
-            if (namedPlayer) {
-              namedPlayer.state = "named";
-              return namedPlayer;
-            } else {
-              const repairedPlayer = await repairPlayer(player);
-              return repairedPlayer;
-            }
-          }));
-          server_cache.set(serverName, {
-            minefortKey,
-            finalPlayers
-          });
-          server.players.list = finalPlayers;
+        const finalPlayers = [];
+        for (const player of playerList) {
+          const namedPlayer = namedPlayers.find(p => p.id === player.uuid);
+          if (namedPlayer) {
+            namedPlayer.state = "named";
+            finalPlayers.push(namedPlayer);
+          } else {
+            const repairedPlayer = await repairPlayer(player);
+            finalPlayers.push(repairedPlayer);
+          }
         }
 
-        return server;
-      })
-    );
+        server_cache.set(serverName, {
+          minefortKey,
+          finalPlayers
+        });
+        server.players.list = finalPlayers;
+      }
+
+      // Update back to the array
+      data.result[i] = server;
+    }
+    console.log(`Processed ${data.result.length} servers`);
+
 
     res.set('Access-Control-Allow-Origin', '*');
     res.json(data);
