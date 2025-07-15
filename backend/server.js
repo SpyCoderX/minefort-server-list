@@ -33,6 +33,7 @@ async function refreshServerData() {
       const serverName = server.serverName;
       const ip = `${serverName}.minefort.com`;
       let players = server.players.list || [];
+      console.log(`Processing server ${serverName} (${ip}):`,server);
       try {
         const rawPlayers = await getPlayerList(ip);
         for (const player of rawPlayers) {
