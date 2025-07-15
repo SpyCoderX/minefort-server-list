@@ -80,5 +80,5 @@ def ping_server(ip, port, timeout=0.1,hostname=None):
         # print(f"[X] - Error pinging {ip}:{port} - {e}\n",end="")
         return None
 
-for player in ping_server("blockregx.minefort.com",25565,hostname="blockregx.minefort.com")[2].get("players", {}).get("sample"):
+for player in ping_server("NexusIceSMP.minefort.com",25565,hostname="NexusIceSMP.minefort.com")[2].get("players", {}).get("sample"):
     print(f"Player: {player.get('name')} - UUID: {player.get('id')}")

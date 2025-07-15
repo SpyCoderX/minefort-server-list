@@ -1,6 +1,7 @@
 const express = require('express');
 const fetch = require('node-fetch');
 const net = require('net');
+const dns = require('dns').promises;
 
 const app = express();
 app.use((req, res, next) => {
@@ -26,7 +27,6 @@ async function refreshServerData() {
     });
 
     const data = await res.json();
-    console.log(`Data: ${data}`)
 
     for (const server of data.result) {
       const serverName = server.serverName;
@@ -126,7 +126,17 @@ function readVarInt(socket) {
 /**
  * Ping a Minecraft Java Edition server manually
  */
-async function pingServer(ip, port = 25565, timeout = 2000, hostname = null) {
+
+async function pingServer(ipOrHostname, port = 25565, timeout = 500) {
+  try {
+    const { address } = await dns.lookup(ipOrHostname, { family: 4 });
+    return internalPing(address, port, timeout, ipOrHostname); // hostname still used in handshake
+  } catch (err) {
+    throw new Error(`DNS resolution failed for ${ipOrHostname}: ${err.message}`);
+  }
+}
+
+async function internalPing(ip, port = 25565, timeout = 2000, hostname = null) {
   return new Promise((resolve, reject) => {
     const client = new net.Socket();
     let responseData = Buffer.alloc(0);
@@ -249,7 +259,6 @@ async function getPlayerDetails(id) {
 }
 
 app.post('/api/servers', async (req, res) => {
-  console.log('Received request:', req.body);
   try {
     const response = await fetch('https://api.minefort.com/v1/servers/list', {
       method: 'POST',
