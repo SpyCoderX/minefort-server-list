@@ -33,7 +33,7 @@ async function refreshServerData() {
       const serverName = server.serverName;
       const ip = `${serverName}.minefort.com`;
       let players = server.players.list || [];
-      console.log(`Processing server ${serverName} (${ip}):`,server);
+      console.log(`Processing server ${serverName} (${ip})`);
       try {
         const rawPlayers = await getPlayerList(ip);
         for (const player of rawPlayers) {
@@ -108,23 +108,24 @@ function writeString(str) {
 /**
  * Read a VarInt from the socket buffer
  */
-function readVarInt(buffer, offset = 0) {
+function readVarIntFromBuffer(buffer, offset = 0) {
   let num = 0;
   let shift = 0;
-  let length = 0;
+  let bytesRead = 0;
 
   while (true) {
-    if (offset + length >= buffer.length) throw new Error('Incomplete VarInt');
-    const byte = buffer[offset + length];
+    if (offset + bytesRead >= buffer.length) return null;
+    const byte = buffer[offset + bytesRead];
     num |= (byte & 0x7F) << shift;
     shift += 7;
-    length++;
+    bytesRead++;
     if ((byte & 0x80) === 0) break;
-    if (length > 5) throw new Error('VarInt too big');
+    if (bytesRead > 5) throw new Error('VarInt too big');
   }
 
-  return { value: num, bytes: length };
+  return { value: num, bytes: bytesRead };
 }
+
 
 /**
  * Ping a Minecraft Java Edition server manually
@@ -147,7 +148,7 @@ function promiseTimeout(promise, ms) {
   ]);
 }
 
-async function pingServer(ipOrHostname, port = 25565, timeout = 4000) {
+async function pingServer(ipOrHostname, port = 25565, timeout = 8000) {
   try {
     const { address } = await dnsLookupWithTimeout(ipOrHostname, 2000);
     return await promiseTimeout(internalPing(address, port, timeout, ipOrHostname), timeout);
@@ -193,21 +194,30 @@ async function internalPing(ip, port = 25565, timeout = 2000, hostname = null) {
       client.write(requestPacket);
     });
 
-    client.on('data', async (chunk) => {
+    client.on('data', (chunk) => {
       responseData = Buffer.concat([responseData, chunk]);
 
       try {
-        // Read packet length
-        const length = await readVarInt(client);
-        const packetId = await readVarInt(client);
-        const jsonLength = await readVarInt(client);
+        let offset = 0;
+        const lengthInfo = readVarIntFromBuffer(responseData, offset);
+        if (!lengthInfo) return;
+        offset += lengthInfo.bytes;
 
-        if (responseData.length >= jsonLength) {
-          const jsonPart = responseData.slice(-jsonLength).toString('utf8');
-          const status = JSON.parse(jsonPart);
-          client.destroy();
-          resolve(status);
-        }
+        const packetIdInfo = readVarIntFromBuffer(responseData, offset);
+        if (!packetIdInfo) return;
+        offset += packetIdInfo.bytes;
+
+        const jsonLengthInfo = readVarIntFromBuffer(responseData, offset);
+        if (!jsonLengthInfo) return;
+        offset += jsonLengthInfo.bytes;
+
+        const totalRequired = offset + jsonLengthInfo.value;
+        if (responseData.length < totalRequired) return; // Wait for more data
+
+        const jsonStr = responseData.slice(offset, totalRequired).toString('utf8');
+        const status = JSON.parse(jsonStr);
+        client.destroy();
+        resolve(status);
       } catch (err) {
         client.destroy();
         reject(err);
