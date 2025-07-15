@@ -215,6 +215,7 @@ async function getPlayerList(ip) {
     if (!result || !result.players || !result.players.sample) {
       throw new Error('Invalid server response');
     }
+    console.log(`Fetched player list for ${ip}:`, result.players.sample);
     return result.players.sample || [];
   } catch (err) {
     console.error(`Failed to get player list for ${ip}:`, err);
