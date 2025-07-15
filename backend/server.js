@@ -16,7 +16,7 @@ async function refreshServerData() {
     const res = await fetch('https://api.minefort.com/v1/servers/list', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({ pagination: { page: 1, limit: 100 } })
+      body: JSON.stringify({ pagination: { skip: 0, limit: 100 }, sort: { field: 'players.online', order: 'desc' } })
     });
 
     const data = await res.json();
