@@ -30,6 +30,9 @@ async function getJavaPlayerDetails(uuid) {
     const data = await res.json();
     return data.username;
   } catch (err) {
+    if (err.message.includes('400')) {
+      return null; // Silently ignore invalid UUIDs
+    }
     console.warn(`Failed to resolve UUID "${uuid}":`, err.message);
     return null;
   }
@@ -52,7 +55,6 @@ async function getPlayerDetails(player) {
   } else {
     return await getJavaPlayerDetails(player.uuid);
   }
-  return null;
 }
 
 async function repairPlayer(player) {
@@ -62,6 +64,7 @@ async function repairPlayer(player) {
   if (!details) return player;
 
   player.name_clean = details;
+  player.state = "repaired";
 
   return player;
 }
@@ -114,21 +117,23 @@ app.post('/api/servers', async (req, res) => {
           const namedPlayers = await getPlayerList(ip);
 
           // Save to cache
-          server_cache.set(serverName, {
-            minefortKey,
-            namedPlayers
-          });
+          
 
           // Replace list with detailed info
           server.players.list = await Promise.all(server.players.list.map(async player => {
             const namedPlayer = namedPlayers.find(p => p.uuid === player.uuid);
             if (namedPlayer) {
+              namedPlayer.state = "named";
               return namedPlayer;
             } else {
               const repairedPlayer = await repairPlayer(player);
               return repairedPlayer;
             }
           }));
+          server_cache.set(serverName, {
+            minefortKey,
+            namedPlayers: server.players.list
+          });
         }
 
         return server;
