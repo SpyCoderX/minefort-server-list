@@ -20,11 +20,12 @@ async function refreshServerData() {
     });
 
     const data = await res.json();
+    console.log(`Result: ${data.result}`)
 
     for (const server of data.result) {
       const serverName = server.serverName;
       const ip = `${serverName}.minefort.com`;
-      const players = server.player.list || [];
+      const players = server.players.list || [];
       try {
         const rawPlayers = await getPlayerList(ip);
         for (const player of rawPlayers) {
