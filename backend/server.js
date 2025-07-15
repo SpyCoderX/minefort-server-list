@@ -61,7 +61,7 @@ let rateLimitPauseCompleted = 0;
 
 setInterval(async () => {
   if (Date.now() < rateLimitPauseCompleted) {
-    console.log(`Rate limit pause active until ${new Date(rateLimitPauseCompleted).toLocaleTimeString()}`);
+    console.log(`Rate limit pause active until ${new Date(rateLimitPauseCompleted).toDateString()}`);
     return; // Skip if rate limit pause is active
   }
   const player = fallbackQueue.shift();
@@ -244,7 +244,11 @@ async function getPlayerList(ip) {
   try {
     const result = await pingServer(ip);
     if (!result || !result.players || !result.players.sample) {
-      throw new Error('Invalid server response: '+JSON.stringify(result));
+      if (result.version.name.includes("Velocity") || result.version.name.includes("Error")) {
+        return [];
+      } else {
+        throw new Error("Invlaid server response: " + JSON.stringify(result))
+      }
     }
     // console.log(`Fetched player list for ${ip}:`, result.players.sample);
     return result.players.sample || [];

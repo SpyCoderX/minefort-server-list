@@ -57,8 +57,8 @@ function buildLegend(legendElement) {
             <div class="plan-right">
             <span class="plan-cost-value">$${plan_costs[index]}</span>
             <span class="plan-ram-value">${plan_ram[index]} GB</span>
-            <span class="plan-storage-value">${plan_storage[index]} GB SSD</span>
-            <span class="plan-backups-value">${plan_backups[index]} backups</span>
+            <span class="plan-storage-value">${plan_storage[index]} GB</span>
+            <span class="plan-backups-value">${plan_backups[index]}</span>
             </div>
             </div>
         </div>`;
