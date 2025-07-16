@@ -570,6 +570,9 @@
                         item.classList.toggle('active');
                     });
                 });
+                docment.querySelectorAll('.server-item').forEach(item => {
+                    item.addEventListener('click', () => {})
+                })
             });
         }
         const tooltip = document.getElementById('global-tooltip');
@@ -598,6 +601,8 @@
                 icon.addEventListener('mouseleave', hideTooltip);
             });
         }
+        document.querySelector("body").addEventListener('click',() => {})
+        document.querySelector(".glass-container").addEventListener('click',() => {})
 
         // // Delegate click for motd toggles
         // document.getElementById('server-list').addEventListener('click', function(e) {
