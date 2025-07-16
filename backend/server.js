@@ -80,7 +80,7 @@ setInterval(async () => {
   } else {
     fallbackQueue.push(player); // Requeue if failed
   }
-}, 8000); // 1 req/sec = 60/min (rate limit safety)
+}, 11000); // 1 req/sec = 60/min (rate limit safety)
 
 
 // Run every 30 seconds
