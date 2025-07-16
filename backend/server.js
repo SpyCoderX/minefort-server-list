@@ -152,7 +152,7 @@ function promiseTimeout(promise, ms) {
   ]);
 }
 
-async function pingServer(ipOrHostname, port = 25565, timeout = 8000) {
+async function pingServer(ipOrHostname, port = 25565, timeout = 12000) {
   try {
     const { address } = await dnsLookupWithTimeout(ipOrHostname, 2000);
     return await promiseTimeout(internalPing(address, port, timeout, ipOrHostname), timeout);
