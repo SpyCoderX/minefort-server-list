@@ -32,7 +32,7 @@ const plan_ram = [1, 2, 4, 8, 12]; // in GB
 const plan_storage = [10, 20, 40, 80, 120]; // in GB SSD
 const plan_backups = [1, 3, 5, 7, 15];
 // Solid colors for each plan tier (normal and hover) (made procedurally from rawColorValues)
-const planColors = rawColorValues.map(color => `rgba(${color.join(",")},0.32)`);
+const planColors = rawColorValues.map(color => `rgba(${color.map(a => a*2).join(",")},0.32)`);
 const planColorsHover = rawColorValues.map(color => `rgba(${color.join(",")},0.64)`);
 const glowColors = rawColorValues.map(color => `rgba(${color.map(a => a*2).join(",")}, 0.12)`)
 const glowColorsHover = rawColorValues.map(color => `rgba(${color.map(a => a*2).join(",")}, 0.24)`)
@@ -219,8 +219,8 @@ async function minefortOnLoad(serverListElement, aboutElement) {
               box-shadow:
                 0 4px 16px 0 rgba(0,0,0,0.18),
                 0 0 0 1px rgba(255,255,255,0.08),
-                inset 0 0 8px 2px ${glowColors[planTier]},
-                inset 0 0 32px 4px ${glowColors[planTier]};
+                inset 0 0 8px 8px rgba(0,0,0,0.2),
+                inset 0 0 16px 24px rgba(0,0,0,0.1);
             }
             .${uniqueId}:hover {
               background: ${planColorsHover[planTier]};
