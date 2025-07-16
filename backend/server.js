@@ -61,7 +61,7 @@ let rateLimitPauseCompleted = 0;
 
 setInterval(async () => {
   if (Date.now() < rateLimitPauseCompleted) {
-    console.log(`Rate limit pause active until ${new Date(rateLimitPauseCompleted).toDateString()}`);
+    // console.log(`Rate limit pause active until ${new Date(rateLimitPauseCompleted).toUTCString()}`);
     return; // Skip if rate limit pause is active
   }
   const player = fallbackQueue.shift();
@@ -76,11 +76,11 @@ setInterval(async () => {
     return;
   }
   if (name) {
-    uuidNameCache.set(uuid, { name, lastSeen: Date.now() });
+    uuidNameCache.set(uuid, { name:name.name, lastSeen: Date.now() });
   } else {
     fallbackQueue.push(player); // Requeue if failed
   }
-}, 3000); // 1 req/sec = 60/min (rate limit safety)
+}, 8000); // 1 req/sec = 60/min (rate limit safety)
 
 
 // Run every 30 seconds
