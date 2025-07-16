@@ -51,13 +51,15 @@
             transition: filter 0.2s;
         }
         .plan-legend-item:hover {
-            filter: brightness(1.5);
+            filter:brightness(1.2);
         }
         .plan-legend-item:hover > .plan-details {
             max-height: 110px;
+            filter: none;
             /* visibility: visible; */
         }
         .plan-details {
+            filter: blur(8px);
             display: flex;
             /* flex-direction: column; */
             align-items: center;
@@ -67,7 +69,7 @@
             max-height: 0px;
             /* visibility: hidden; */
             overflow: hidden;
-            transition: max-height 0.5s;
+            transition: max-height 0.2s cubic-bezier(0.445, 0.05, 0.55, 0.95), filter 0.4s;
         }
         .plan-left {
             display: flex;
@@ -171,7 +173,8 @@
         .server-list {
             margin-top: 2.5rem;
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+
             grid-auto-rows: 1fr;
             gap: 1.5rem;
             height: 1.2rem;
@@ -203,13 +206,26 @@
         }
         .copy-ip-btn {
             fill: rgba(255,255,255,0.8);
-            transition: fill 0.2s, transform 0.2s ;
+            transition: fill 0.2s, transform 0.2s, box-shadow 0.2s ;
             cursor: pointer;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+            background: none;
+            border: none;
+            padding: 0.7em 0.8em 0.4em 0.8em;
+            margin-left: 0.5em;
+            vertical-align: middle;
+            box-shadow: 
+                inset 0 0 4px 3px rgba(0,0,0,0.1),
+                0 4px 8px 2px rgba(0,0,0,0.4),
+                0 1px 4px rgba(0,0,0,0.18);
+            border-radius: 4px;
         }
         .copy-ip-btn:hover {
             fill: rgba(255,255,255,0.9);
             transform: scale(1.1);
+            box-shadow: 
+                inset 0 0 4px 3px rgba(255,255,255,0.1),
+                0 4px 8px 2px rgba(0,0,0,0.4),
+                0 1px 4px rgba(0,0,0,0.18);
         }
         .copied, .copied:hover {
             fill: rgba(100,255,100,0.9);
@@ -283,6 +299,8 @@
             flex-wrap: wrap;
             gap: 0.3em;
             max-height: fit-content;
+            max-width: 100%;
+            box-sizing: border-box;
             overflow: visible;
             background: rgba(0, 0, 0, 0.521);
             padding: 5px;
@@ -295,6 +313,36 @@
             margin: 4px;
             z-index: 1;
             transition: transform 0.15s ease-in-out;
+            box-shadow: 0 0 16px 2px rgba(0,0,0,0.4);
+            width: 24px;
+            height: 24px;
+        }
+        .actual-icon {
+            z-index: 2;
+            position: relative;
+        }
+        .empty-icon-wrapper {
+            overflow: hidden;
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+        }
+        .empty-icon {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            filter: blur(3px) opacity(0.5);
+        }
+        .broken > .empty-icon-wrapper {
+            visibility: hidden;
+        }
+        .broken > img {
+            box-shadow: 0 0 6px 2px rgba(255,0,0,1);
+            filter: opacity(0.5);
+        }
+        .broken {
+            background: none;
+            filter: blur(2px);
         }
 
         #global-tooltip {
@@ -352,14 +400,7 @@
             flex-direction: column;
             align-items: flex-start;
         }
-        .copy-ip-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 0.2em 0.5em;
-            margin-left: 0.5em;
-            vertical-align: middle;
-        }
+
         .server-top img {
             width: 22px;
             height: 22px;
