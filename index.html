@@ -29,24 +29,36 @@
 
         .plan-legend {
             display: flex;
+            flex-wrap: wrap;
             align-items: center;
             justify-content: center;
             height: 100%;
             min-height: 200px;
             max-height: fit-content;
             text-align: center;
-            gap: 1rem;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            gap: 3vw;
+        }
+        .plan-legend-wrapper {
+            height: 70px;
+            width: 110px;
+            margin: 2vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         .plan-legend-item {
+            position: absolute;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100%;
             max-height: fit-content;
+            width: 110px;
             text-align: center;
-            margin: 20px;
-            padding: 20px;
+            padding: 2vw;
             border-radius: 12px;
             transition: filter 0.2s;
         }
@@ -69,7 +81,7 @@
             max-height: 0px;
             /* visibility: hidden; */
             overflow: hidden;
-            transition: max-height 0.2s cubic-bezier(0.445, 0.05, 0.55, 0.95), filter 0.4s;
+            transition: max-height 0.2s ease, filter 0.4s;
         }
         .plan-left {
             display: flex;
@@ -96,7 +108,10 @@
             max-width: auto;
             width: auto;
             text-align: center;
-            margin: 5% 10% 0% 10%;
+            margin-top: 5%;
+            margin-bottom: 0%;
+            margin-left: max(0,100%-60px);
+            margin-right: max(0,100%-60px);
             text-shadow: 0 0 4px rgba(255,255,255,0.9);
 
             display: flex;
@@ -109,8 +124,9 @@
         }
         .about {
             position: relative;
-            height: 250px; /* or whatever height you want */
+            height: fit-content; /* or whatever height you want */
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
@@ -121,13 +137,19 @@
             z-index: 1;
             max-width: 500px;
         }
+        .about-bottom {
+            display: flex;
+            flex-direction: row;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
 
         /* Left column (servers/players) */
         .about-stats {
             position: absolute;
             left: 0;
-            top: 50%;
-            transform: translateY(-50%);
+            /* top: 50%; */
+            /* transform: translateY(-50%); */
             text-align: left;
             padding-left: 2rem;
         }
@@ -136,8 +158,8 @@
         .about-info {
             position: absolute;
             right: 0;
-            top: 50%;
-            transform: translateY(-50%);
+            /* top: 50%; */
+            /* transform: translateY(-50%); */
             text-align: right;
             padding-right: 2rem;
         }
@@ -173,14 +195,31 @@
         .server-list {
             margin-top: 2.5rem;
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-
+            grid-template-columns: repeat(4, minmax(0, 1fr)); /* default: 4 columns */
             grid-auto-rows: 1fr;
             gap: 1.5rem;
             height: 1.2rem;
             overflow: hidden;
             transition: height 1s cubic-bezier(0.755, 0.05, 0.855, 0.06);
         }
+        @media (max-width: 1500px) {
+            .server-list {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .server-list {
+                grid-template-columns: 1fr 1fr; /* 1 column */
+            }
+        }
+        /* 👇 Mobile layout: 1 column below 768px width */
+        @media (max-width: 900px) {
+            .server-list {
+                grid-template-columns: 1fr; /* 1 column */
+            }
+        }
+
         .server-list h2 {
             font-size: 1.2rem;
             margin-bottom: 0.5rem;
@@ -313,7 +352,7 @@
             margin: 4px;
             z-index: 1;
             transition: transform 0.15s ease-in-out;
-            box-shadow: 0 0 16px 2px rgba(0,0,0,0.4);
+            box-shadow: 0 0 16px 4px rgba(0,0,0,0.8);
             width: 24px;
             height: 24px;
         }
@@ -494,11 +533,6 @@
         <h1>Minefort Server List</h1>
         <div class="info">
             <div class="about" id="about">
-                <div class="about-stats">
-                    <div>Servers <span class="about-servers mc-color-9">...</span></div>
-                    <div>Players <span class="about-players mc-color-9">...</span></div>
-                </div>
-
                 <div class="about-text">
                     <p>This is an improved Minefort server list.</p>
                     <p>It includes features like MOTDs, player counts, and version!</p>
@@ -507,10 +541,15 @@
                     <br>
                     <p>This works through Minefort's API, just like the official server list.</p>
                 </div>
-
+                <div class="about-bottom">
+                <div class="about-stats">
+                    <div>Servers <span class="about-servers mc-color-9">...</span></div>
+                    <div>Players <span class="about-players mc-color-9">...</span></div>
+                </div>
                 <div class="about-info">
                     <div class="about-version">Version: <span class="mc-color-6">1.2.1</span></div>
                     <div class="about-creator">Created by <a class="mc-color-9" href="https://github.com/SpyCoderX">SpyCoderX</a></div>
+                </div>
                 </div>
             </div>
 

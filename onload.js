@@ -45,7 +45,7 @@ function buildLegend(legendElement) {
     }
     legendElement.innerHTML = Object.entries(plans).map(([key, name], index) => {
         const color = planColors[index] || 'rgba(0,0,0,0.1)';
-        return `<div class="plan-legend-item" style="background: ${color}; box-shadow: 0 4px 16px 0 rgba(0,0,0,0.50), 0 0 0 1px rgba(255,255,255,0.30), inset 0 0 8px 2px ${glowColorsLegend[index]}, inset 0 0 32px 4px ${glowColorsLegend[index]};">
+        return `<div class="plan-legend-wrapper"><div class="plan-legend-item" style="background: ${color}; box-shadow: 0 4px 16px 0 rgba(0,0,0,0.50), 0 0 0 1px rgba(255,255,255,0.30), inset 0 0 8px 2px ${glowColorsLegend[index]}, inset 0 0 32px 4px ${glowColorsLegend[index]};">
             <h3 class="plan-name">${name}</h3>
             <div class="plan-details">
             <div class="plan-left">
@@ -61,7 +61,7 @@ function buildLegend(legendElement) {
             <span class="plan-backups-value">${plan_backups[index]}</span>
             </div>
             </div>
-        </div>`;
+        </div></div>`;
     }).join("");
 }
 
