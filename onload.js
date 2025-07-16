@@ -193,7 +193,7 @@ async function minefortOnLoad(serverListElement, aboutElement) {
             <span>${colorizeMotd(motd)}</span>
         </div>`;
         const playerList = `<div class="player-list">
-            ${players.list.map(player => `<div class="player-icon ${(!player.name)?"broken":""}" data-name="${player.name || 'Error loading username'}"><div class="empty-icon-wrapper"><img class="empty-icon" src="empty.png" width="24" height="24"/></div><img class="actual-icon" src="https://avatars.minefort.com/avatar/${player.uuid}" width="24" height="24" alt="${player.uuid}" class="player-avatar" /></div>`).join('')}
+            ${players.list.map(player => `<div class="player-icon ${(!player.name)?"broken":""}" data-name="${player.name || 'Error loading username'}"><img class="empty-icon" src="empty.png" width="24" height="24"/><img class="actual-icon" src="https://avatars.minefort.com/avatar/${player.uuid}" width="24" height="24" alt="${player.uuid}" class="player-avatar" /></div>`).join('')}
         </div>`;
         const bottomRow = `<div class="server-bottom">
             <div>
