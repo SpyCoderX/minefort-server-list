@@ -85,6 +85,7 @@ setInterval(async () => {
 
 // Run every 30 seconds
 setInterval(refreshServerData, 30_000);
+refreshServerData()
 
 /**
  * Encode an integer as a VarInt (used by Minecraft protocol)
