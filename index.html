@@ -189,7 +189,7 @@
             box-shadow: 0 0 32px 8px rgba(10, 12, 20, 0.9);
             border-radius: 16px;
             border: 1px solid rgba(255,255,255,0.10);
-            padding: 2rem 3rem;
+            padding: 1rem 2rem;
             color: #fff;
             max-width: 100%;
             width: auto;
@@ -280,11 +280,6 @@
             white-space: nowrap;
             text-shadow: 0 0 5px rgba(255,255,255,1);
         }
-        .server-desc {
-            color: #b0b3b8;
-            font-size: 0.98rem;
-            margin-bottom: 0.5rem;
-        }
         .server-list-info {
             grid-column: 1 / -1;
             display: flex;
@@ -319,7 +314,6 @@
             flex-direction: column;
             justify-content: flex-start;
             overflow-y: hidden;
-            min-height: 0;
             text-shadow: 0 0 8px rgba(255,255,255,0.8), 0 0 16px rgba(255,255,255,0.6);
             scrollbar-width: 0;
         }
@@ -377,7 +371,7 @@
         
 
         #global-tooltip {
-            position: fixed;
+            position:absolute;
             pointer-events: none;
             background: rgba(50,50,50, 0.2);
             color: #fff;
@@ -557,8 +551,9 @@
         <div class="server-list" id="server-list">
             <!-- Server list will be filled by JavaScript -->
         </div>
+        <div id="global-tooltip"></div>
     </div>
-    <div id="global-tooltip"></div>
+    
     <script src="onload.js"></script>
     <script>
       window.addEventListener('DOMContentLoaded', function() {
@@ -596,7 +591,7 @@
                 const playerName = icon.getAttribute('data-name'); // set this attribute below
 
                 icon.addEventListener('mousemove', e => {
-                showTooltip(playerName, e.clientX, e.clientY);
+                showTooltip(playerName, e.pageX, e.pageY);
                 });
 
                 icon.addEventListener('mouseleave', hideTooltip);
