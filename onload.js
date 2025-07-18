@@ -288,13 +288,13 @@ async function minefortOnLoad(serverListElement, aboutElement) {
             aboutElement.querySelector('.servers-total').innerHTML = total_servers;
 
             aboutElement.querySelector('.players-total').innerHTML = total_players;
-            aboutElement.querySelector('.players-java').innerHTML = `${java_players} (${Math.floor(java_players/total_players*100)}%)`;
-            aboutElement.querySelector('.players-bedrock').innerHTML = `${bedrock_players} (${Math.floor(bedrock_players/total_players*100)}%)`;
-            aboutElement.querySelector('.players-cracked').innerHTML = `${cracked_players} (${Math.floor(cracked_players/total_players*100)}%)`;
-            aboutElement.querySelector('.players-unknown').innerHTML = `${unknown_players} (${Math.floor(unknown_players/total_players*100)}%)`;
+            aboutElement.querySelector('.players-java').innerHTML = `${java_players} (${Math.round(java_players/total_players*1000)/10}%)`;
+            aboutElement.querySelector('.players-bedrock').innerHTML = `${bedrock_players} (${Math.round(bedrock_players/total_players*1000)/10}%)`;
+            aboutElement.querySelector('.players-cracked').innerHTML = `${cracked_players} (${Math.round(cracked_players/total_players*1000)/10}%)`;
+            aboutElement.querySelector('.players-unknown').innerHTML = `${unknown_players} (${Math.round(unknown_players/total_players*1000)/10}%)`;
 
             Object.entries(plans).forEach(([key,name]) => {
-                aboutElement.querySelector(`.servers-${name.split(" ")[0]}`).innerHTML = `${servers_to_plan.get(parseInt(key))} (${Math.floor(servers_to_plan.get(parseInt(key))/total_servers*100)}%)`;
+                aboutElement.querySelector(`.servers-${name.split(" ")[0]}`).innerHTML = `${servers_to_plan.get(parseInt(key))} (${Math.round(servers_to_plan.get(parseInt(key))/total_servers*1000)/10}%)`;
             });
 
             serverListElement.innerHTML = servers.map(createServerItem).join("");
