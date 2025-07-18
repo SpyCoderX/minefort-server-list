@@ -25,6 +25,13 @@
             overflow: auto;
             scrollbar-width: none; /* Firefox */
         }
+        code {
+            background-color: rgba(0,0,0,0.5);
+            border-radius: 4px;
+            border-color: rgba(100,100,100,0.5);
+            border-width: 1px;
+            border-style: solid;
+        }
 
         body::-webkit-scrollbar {
             display: none; /* Chrome, Safari */
@@ -535,7 +542,7 @@
                     <p>Click on a server to copy its IP address.</p>
                     <br>
                     <p>This works through Minefort's API, just like the official server list. The player list is achieved through using the "server ping" feature built into minecraft server.</p>
-                    <p class="mc-color-c">If you'd like your server to not be shown here, set "visibility" to "private" on the minefort server appearance settings.</p>
+                    <p class="mc-color-c">If you'd like your server to not be shown here, set <code>"appearancy > privacy"</code> to <code>"private"</code> on the minefort panel.</p>
                 </div>
                 <div class="about-info">
                     <div class="about-version">Version: <span class="mc-color-6">1.2.3</span></div>
