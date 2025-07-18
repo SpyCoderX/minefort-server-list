@@ -126,17 +126,9 @@
             text-shadow: 0 0 4px rgba(255,255,255,0.9);
 
             display: flex;
-            /* flex-direction: column; */
-            align-items: center;
-            justify-content: center;
-            height: 100%;
             max-height: fit-content;
-            text-align: center;
-        }
-        .about {
             position: relative;
             height: fit-content; /* or whatever height you want */
-            display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -150,27 +142,25 @@
         }
         .about-bottom {
             display: flex;
-            flex-direction: row;
+            /* flex-direction: row; */
+            height: fit-content;
+            align-items:center;
+            justify-content:space-between;
+            text-align: center;
+            
             margin-top: 20px;
             margin-bottom: 20px;
+            width:100%;
         }
 
         /* Left column (servers/players) */
         .about-stats {
-            position: absolute;
-            left: 0;
-            /* top: 50%; */
-            /* transform: translateY(-50%); */
             text-align: left;
             padding-left: 2rem;
         }
 
         /* Right column (version/creator) */
         .about-info {
-            position: absolute;
-            right: 0;
-            /* top: 50%; */
-            /* transform: translateY(-50%); */
             text-align: right;
             padding-right: 2rem;
         }
@@ -181,6 +171,11 @@
             display: inline-block;
             min-width: 3ch;
             font-family: monospace;
+        }
+        .about-total {
+            font-size: large;
+            margin-bottom: 2px;
+            font-weight: bold;
         }
 
 
@@ -533,11 +528,20 @@
                 </div>
                 <div class="about-bottom">
                 <div class="about-stats">
-                    <div>Servers <span class="about-servers mc-color-9">...</span></div>
-                    <div>Players <span class="about-players mc-color-9">...</span></div>
+                    <div class="about-servers" id="about-servers">
+                        <span class="about-total">Servers <span class="servers-total mc-color-9">...</span></span><br>
+                    </div>
+                    <br>
+                    <div class="about-players">
+                        <span class="about-total">Players <span class="players-total mc-color-9">...</span></span><br>
+                        Java <span class="players-java mc-color-9">...</span><br>
+                        Bedrock <span class="players-bedrock mc-color-9">...</span><br>
+                        Cracked <span class="players-cracked mc-color-9">...</span><br>
+                        Unknown <span class="players-unknown mc-color-c">...</span>
+                    </div>
                 </div>
                 <div class="about-info">
-                    <div class="about-version">Version: <span class="mc-color-6">1.2.1</span></div>
+                    <div class="about-version">Version: <span class="mc-color-6">1.2.2</span></div>
                     <div class="about-creator">Made by <a class="mc-color-9" href="https://github.com/SpyCoderX">SpyCoderX</a></div>
                 </div>
                 </div>
@@ -558,7 +562,7 @@
     <script>
       window.addEventListener('DOMContentLoaded', function() {
         if (typeof minefortOnLoad === 'function') {
-            buildLegend(document.getElementById('plan-legend'));
+            buildLegend(document.getElementById('plan-legend'),document.getElementById('about-servers'));
             minefortOnLoad(document.getElementById('server-list'),document.getElementById('about')).then(() => {
                 setupPlayerTooltips();
                 document.querySelectorAll('.plan-legend-item').forEach(item => {
@@ -566,7 +570,7 @@
                         item.classList.toggle('active');
                     });
                 });
-                docment.querySelectorAll('.server-item').forEach(item => {
+                document.querySelectorAll('.server-item').forEach(item => {
                     item.addEventListener('click', () => {})
                 })
             });

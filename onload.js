@@ -34,11 +34,12 @@ const plan_backups = [1, 3, 5, 7, 15];
 // Solid colors for each plan tier (normal and hover) (made procedurally from rawColorValues)
 const planColors = rawColorValues.map(color => `rgba(${color.map(a => a*2).join(",")},0.32)`);
 const planColorsHover = rawColorValues.map(color => `rgba(${color.join(",")},0.64)`);
-const glowColors = rawColorValues.map(color => `rgba(${color.map(a => a*2).join(",")}, 0.12)`)
-const glowColorsHover = rawColorValues.map(color => `rgba(${color.map(a => a*2).join(",")}, 0.24)`)
-const glowColorsLegend = rawColorValues.map(color => `rgba(${color.map(a => a*2).join(",")}, 0.40)`)
+const glowColors = rawColorValues.map(color => `rgba(${color.map(a => a*2).join(",")}, 0.12)`);
+const glowColorsHover = rawColorValues.map(color => `rgba(${color.map(a => a*2).join(",")}, 0.24)`);
+const glowColorsLegend = rawColorValues.map(color => `rgba(${color.map(a => a*2).join(",")}, 0.40)`);
+const fullColors = rawColorValues.map(color => `rgba(${color.map(a => a*2).join(",")}, 1)`);
 
-function buildLegend(legendElement) {
+function buildLegend(legendElement,serverElement) {
     if (!legendElement) {
         console.error('Legend element not found.');
         return;
@@ -63,6 +64,11 @@ function buildLegend(legendElement) {
             </div>
         </div></div>`;
     }).join("");
+    serverElement.innerHTML += Object.entries(plans).map(([key,name], index) => {
+        const color = fullColors[index] || 'rgba(0,0,0,1)';
+        return `${name.split(" ")[0]} <span class="servers-${name.split(" ")[0]} " style="color: ${color}; text-shadow: 0 0 8px ${color}, 0 0 4px ${color};">...</span><br>`
+    }).join("");
+
 }
 
 async function minefortOnLoad(serverListElement, aboutElement) {
@@ -252,9 +258,45 @@ async function minefortOnLoad(serverListElement, aboutElement) {
                 return;
             }
             const total_servers = servers.length;
-            const total_players = servers.reduce((sum, server) => sum + (server.players?.online || 0), 0);
-            aboutElement.querySelector('.about-servers').innerHTML = total_servers;
-            aboutElement.querySelector('.about-players').innerHTML = total_players;
+            let total_players = 0;
+            let java_players = 0;
+            let bedrock_players = 0;
+            let cracked_players = 0;
+            let unknown_players = 0;
+            let servers_to_plan = new Map(Object.entries(plans).map(([key,value]) => [parseInt(key),0]));
+            servers.forEach(server => {
+                total_players += server.players.online;
+                server.players.list.forEach(player => {
+                    let name = player?.name;
+                    if (name) {
+                        if (name.startsWith("+")) {
+                            cracked_players += 1;
+                        }
+                        else if (name.startsWith(".")) {
+                            bedrock_players += 1;
+                        }
+                        else {
+                            java_players += 1;
+                        }
+                    } else {
+                        unknown_players += 1;
+                    }
+                })
+                const max = server.players.max;
+                servers_to_plan.set(max,servers_to_plan.get(max)+1);
+            });
+            aboutElement.querySelector('.servers-total').innerHTML = total_servers;
+
+            aboutElement.querySelector('.players-total').innerHTML = total_players;
+            aboutElement.querySelector('.players-java').innerHTML = `${java_players} (${Math.floor(java_players/total_players*100)}%)`;
+            aboutElement.querySelector('.players-bedrock').innerHTML = `${bedrock_players} (${Math.floor(bedrock_players/total_players*100)}%)`;
+            aboutElement.querySelector('.players-cracked').innerHTML = `${cracked_players} (${Math.floor(cracked_players/total_players*100)}%)`;
+            aboutElement.querySelector('.players-unknown').innerHTML = `${unknown_players} (${Math.floor(unknown_players/total_players*100)}%)`;
+
+            Object.entries(plans).forEach(([key,name]) => {
+                aboutElement.querySelector(`.servers-${name.split(" ")[0]}`).innerHTML = `${servers_to_plan.get(parseInt(key))} (${Math.floor(servers_to_plan.get(parseInt(key))/total_servers*100)}%)`;
+            });
+
             serverListElement.innerHTML = servers.map(createServerItem).join("");
             serverListElement.style.height = serverListElement.scrollHeight + "px";
             serverListElement.addEventListener('transitionend', () => {
