@@ -114,24 +114,24 @@
             box-shadow: 0 0 32px 8px rgba(10, 12, 20, 0.9);
             border-radius: 16px;
             border: 1px solid rgba(255,255,255,0.10);
-            padding: 2rem 3rem;
+            padding: 1rem;
             color: #fff;
             max-width: auto;
             width: auto;
             text-align: center;
             margin-top: 5%;
             margin-bottom: 0%;
-            margin-left: max(0,100%-60px);
-            margin-right: max(0,100%-60px);
+            margin-left: 10px;
+            margin-right: 10px;
             text-shadow: 0 0 4px rgba(255,255,255,0.9);
 
             display: flex;
             max-height: fit-content;
             position: relative;
             height: fit-content; /* or whatever height you want */
-            flex-direction: column;
+            flex-direction: row;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
             text-align: center;
         }
 
@@ -139,18 +139,6 @@
         .about-text {
             z-index: 1;
             max-width: 500px;
-        }
-        .about-bottom {
-            display: flex;
-            /* flex-direction: row; */
-            height: fit-content;
-            align-items:center;
-            justify-content:space-between;
-            text-align: center;
-            
-            margin-top: 20px;
-            margin-bottom: 20px;
-            width:100%;
         }
 
         /* Left column (servers/players) */
@@ -184,12 +172,12 @@
             box-shadow: 0 0 32px 8px rgba(10, 12, 20, 0.9);
             border-radius: 16px;
             border: 1px solid rgba(255,255,255,0.10);
-            padding: 1rem 2rem;
+            padding: 10px;
             color: #fff;
             max-width: 100%;
             width: auto;
             text-align: center;
-            margin: max(10px, 1%) 1%;
+            margin: 10px;
             text-shadow: 0 0 8px rgba(255,255,255,0.3);
         }
         h1 {
@@ -432,77 +420,82 @@
             border-radius: 4px;
             box-shadow: 0 1px 4px rgba(0,0,0,0.18);
         }
+        :root {
+            --glow-power: 0.6;
+            --glow-power-low: 0.4;
+            --glow-power-lower: 0.2;
+        }
         .glow-2 {
-            text-shadow: 0 0 8px rgba(255,255,255,0.6), 0 0 16px rgba(255,255,255,0.4);
+            text-shadow: 0 0 8px rgba(255,255,255,var(--glow-power)), 0 0 16px rgba(255,255,255,var(--glow-power-low));
         }
         .glow-3 {
-            text-shadow: 0 0 4px rgba(255,255,255,0.3), 0 0 8px rgba(255,255,255,0.2);
+            text-shadow: 0 0 4px rgba(255,255,255,var(--glow-power-low)), 0 0 8px rgba(255,255,255,var(--glow-power-lower));
         }
 
         /* Minecraft legacy color codes */
         .mc-color-0 { 
             color: #000000;
-            text-shadow: 0 0 4px rgba(0,0,0,0.6), 0 0 8px rgba(0,0,0,0.8);
+            text-shadow: 0 0 4px rgba(0,0,0,var(--glow-power-low)), 0 0 8px rgba(0,0,0,var(--glow-power));
         } /* Black */
         .mc-color-1 { 
             color: #0000AA;
-            text-shadow: 0 0 4px rgba(0,0,170,0.6), 0 0 8px rgba(0,0,170,0.8);
+            text-shadow: 0 0 4px rgba(0,0,170,var(--glow-power-low)), 0 0 8px rgba(0,0,170,var(--glow-power));
          } /* Dark Blue */
         .mc-color-2 { 
             color: #00AA00;
-            text-shadow: 0 0 4px rgba(0,170,0,0.6), 0 0 8px rgba(0,170,0,0.8);
+            text-shadow: 0 0 4px rgba(0,170,0,var(--glow-power-low)), 0 0 8px rgba(0,170,0,var(--glow-power));
         } /* Dark Green */
         .mc-color-3 { 
             color: #00AAAA; 
-            text-shadow: 0 0 4px rgba(0,170,170,0.6), 0 0 8px rgba(0,170,170,0.8);
+            text-shadow: 0 0 4px rgba(0,170,170,var(--glow-power-low)), 0 0 8px rgba(0,170,170,var(--glow-power));
         } /* Dark Aqua */
         .mc-color-4 { 
             color: #AA0000;
-            text-shadow: 0 0 4px rgba(170,0,0,0.6), 0 0 8px rgba(170,0,0,0.8);
+            text-shadow: 0 0 4px rgba(170,0,0,var(--glow-power-low)), 0 0 8px rgba(170,0,0,var(--glow-power));
         } /* Dark Red */
         .mc-color-5 { 
             color: #AA00AA; 
-            text-shadow: 0 0 4px rgba(170,0,170,0.6), 0 0 8px rgba(170,0,170,0.8);
+            text-shadow: 0 0 4px rgba(170,0,170,var(--glow-power-low)), 0 0 8px rgba(170,0,170,var(--glow-power));
         } /* Dark Purple */
         .mc-color-6 { 
             color: #FFAA00;
-            text-shadow: 0 0 4px rgba(255,170,0,0.6), 0 0 8px rgba(255,170,0,0.8);
+            text-shadow: 0 0 4px rgba(255,170,0,var(--glow-power-low)), 0 0 8px rgba(255,170,0,var(--glow-power));
         } /* Gold */
         .mc-color-7 { 
             color: #AAAAAA;
-            text-shadow: 0 0 4px rgba(170,170,170,0.3), 0 0 8px rgba(170,170,170,0.4);
+            text-shadow: 0 0 4px rgba(170,170,170,var(--glow-power-lower)), 0 0 8px rgba(170,170,170,var(--glow-power-low));
         } /* Gray */
         .mc-color-8 { 
             color: #555555;
-            text-shadow: 0 0 4px rgba(85,85,85,0.3), 0 0 8px rgba(85,85,85,0.4);
+            text-shadow: 0 0 4px rgba(85,85,85,var(--glow-power-lower)), 0 0 8px rgba(85,85,85,var(--glow-power-low));
         } /* Dark Gray */
         .mc-color-9 { 
             color: #5555FF;
-            text-shadow: 0 0 4px rgba(85,85,255,0.6), 0 0 8px rgba(85,85,255,0.8);
+            text-shadow: 0 0 4px rgba(85,85,255,var(--glow-power-low)), 0 0 8px rgba(85,85,255,var(--glow-power));
         } /* Blue */
         .mc-color-a { 
             color: #55FF55;
-            text-shadow: 0 0 4px rgba(85,255,85,0.6), 0 0 8px rgba(85,255,85,0.8);
+            text-shadow: 0 0 4px rgba(85,255,85,var(--glow-power-low)), 0 0 8px rgba(85,255,85,var(--glow-power));
         } /* Green */
         .mc-color-b { 
             color: #55FFFF;
-            text-shadow: 0 0 4px rgba(85,255,255,0.6), 0 0 8px rgba(85,255,255,0.8);
+            text-shadow: 0 0 4px rgba(85,255,255,var(--glow-power-low)), 0 0 8px rgba(85,255,255,var(--glow-power));
         } /* Aqua */
         .mc-color-c { 
             color: #FF5555;
-            text-shadow: 0 0 4px rgba(255,85,85,0.6), 0 0 8px rgba(255,85,85,0.8);
+            text-shadow: 0 0 4px rgba(255,85,85,var(--glow-power-low)), 0 0 8px rgba(255,85,85,var(--glow-power));
         } /* Red */
         .mc-color-d { 
             color: #FF55FF;
-            text-shadow: 0 0 4px rgba(255,85,255,0.6), 0 0 8px rgba(255,85,255,0.8);
+            text-shadow: 0 0 4px rgba(255,85,255,var(--glow-power-low)), 0 0 8px rgba(255,85,255,var(--glow-power));
         } /* Light Purple */
         .mc-color-e { 
             color: #FFFF55;
-            text-shadow: 0 0 4px rgba(255,255,85,0.6), 0 0 8px rgba(255,255,85,0.8);
+            text-shadow: 0 0 4px rgba(255,255,85,var(--glow-power-low)), 0 0 8px rgba(255,255,85,var(--glow-power));
         } /* Yellow */
         .mc-color-f { 
             color: #FFFFFF;
-            text-shadow: 0 0 4px rgba(255,255,255,0.6), 0 0 8px rgba(255,255,255,0.8);
+            text-shadow: 0 0 4px rgba(255,255,255,var(--glow-power-low)), 0 0 8px rgba(255,255,255,var(--glow-power));
         } /* White */
 
         /* Minecraft formatting codes */
@@ -517,16 +510,6 @@
         <h1>Minefort Server List</h1>
         <div class="info">
             <div class="about" id="about">
-                <div class="about-text">
-                    <p>This is an improved Minefort server list.</p>
-                    <p>It includes features like MOTDs, player counts, and version!</p>
-                    <br>
-                    <p>Click on a server to copy its IP address.</p>
-                    <br>
-                    <p>This works through Minefort's API, just like the official server list. The player list is achieved through using the "server ping" feature built into minecraft server.</p>
-                    <p class="mc-color-c">If you'd like your server to not be shown here, set "visibility" to "private" on the minefort server appearance settings.</p>
-                </div>
-                <div class="about-bottom">
                 <div class="about-stats">
                     <div class="about-servers" id="about-servers">
                         <span class="about-total">Servers <span class="servers-total mc-color-9">...</span></span><br>
@@ -540,10 +523,18 @@
                         Unknown <span class="players-unknown mc-color-c">...</span>
                     </div>
                 </div>
+                <div class="about-text">
+                    <p>This is an improved Minefort server list.</p>
+                    <p>It includes features like MOTDs, player counts, and version!</p>
+                    <br>
+                    <p>Click on a server to copy its IP address.</p>
+                    <br>
+                    <p>This works through Minefort's API, just like the official server list. The player list is achieved through using the "server ping" feature built into minecraft server.</p>
+                    <p class="mc-color-c">If you'd like your server to not be shown here, set "visibility" to "private" on the minefort server appearance settings.</p>
+                </div>
                 <div class="about-info">
                     <div class="about-version">Version: <span class="mc-color-6">1.2.2</span></div>
                     <div class="about-creator">Made by <a class="mc-color-9" href="https://github.com/SpyCoderX">SpyCoderX</a></div>
-                </div>
                 </div>
             </div>
 
