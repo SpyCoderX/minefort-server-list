@@ -66,7 +66,7 @@ function buildLegend(legendElement,serverElement) {
     }).join("");
     serverElement.innerHTML += Object.entries(plans).map(([key,name], index) => {
         const color = fullColors[index] || 'rgba(0,0,0,1)';
-        return `${name.split(" ")[0]} <span class="servers-${name.split(" ")[0]} " style="color: ${color}; text-shadow: 0 0 8px ${color}, 0 0 4px ${color};">...</span><br>`
+        return `${name.split(" ")[0]} <span class="servers-${name.split(" ")[0]} " style="color: ${color}; text-shadow: 0 0 8px ${color}, 0 0 4px ${color};"><span class="dot-fade"><z>.</z><z>.</z><z>.</z></span></span><br>`
     }).join("");
 
 }
@@ -77,7 +77,6 @@ async function minefortOnLoad(serverListElement, aboutElement) {
         console.error('Server list element not found.');
         return;
     }
-    serverListElement.innerHTML = '<p>Server list is loading...</p>';
 
     
 
@@ -250,7 +249,7 @@ async function minefortOnLoad(serverListElement, aboutElement) {
     }
 
     async function fillServerList() {
-        serverListElement.innerHTML = '<div class="mc-color-7 server-list-info">Loading...</div>';
+        serverListElement.innerHTML = '<div class="mc-color-7 server-list-info">Loading<span class="dot-fade"><z>.</z><z>.</z><z>.</z></span></div>';
         try {
             const servers = await fetchServers();
             if (!servers.length) {
