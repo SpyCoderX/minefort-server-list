@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Weekly Stats: Players & Servers</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { max-width: 700px; margin: 2rem auto; font-family: Arial, sans-serif; }
+  </style>
+</head>
+<body>
+  <h1>Players & Servers Online (Last 7 Days)</h1>
+  <canvas id="hourlyChart" width="700" height="350"></canvas>
+
+  <script>
+    async function loadChart() {
+      const res = await fetch('https://minefort-server-list-backend.onrender.com/api/stats/hourly');
+      const { labels, playerData, serverData } = await res.json();
+
+      const ctx = document.getElementById('hourlyChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Players Online',
+              data: playerData,
+              borderColor: 'rgba(54, 162, 235, 1)',
+              backgroundColor: 'rgba(54, 162, 235, 0.2)',
+              tension: 0.3,
+              fill: true,
+              yAxisID: 'y',
+            },
+            {
+              label: 'Servers Online',
+              data: serverData,
+              borderColor: 'rgba(255, 159, 64, 1)',
+              backgroundColor: 'rgba(255, 159, 64, 0.2)',
+              tension: 0.3,
+              fill: true,
+              yAxisID: 'y1',
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          interaction: {
+            mode: 'index',
+            intersect: false,
+          },
+          stacked: false,
+          scales: {
+            y: {
+              type: 'linear',
+              display: true,
+              position: 'left',
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Players',
+              },
+            },
+            y1: {
+              type: 'linear',
+              display: true,
+              position: 'right',
+              beginAtZero: true,
+              grid: {
+                drawOnChartArea: false, // only want grid lines on left y-axis
+              },
+              title: {
+                display: true,
+                text: 'Servers',
+              },
+            },
+            x: {
+              ticks: {
+                maxRotation: 90,
+                minRotation: 45,
+                maxTicksLimit: 24, // show max 24 labels to avoid clutter
+              },
+            },
+          },
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false,
+            },
+          },
+        },
+      });
+    }
+
+    loadChart();
+  </script>
+</body>
+</html>
