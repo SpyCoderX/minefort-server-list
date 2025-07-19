@@ -2,100 +2,199 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Weekly Stats: Players & Servers</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Minefort Server Stats</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { max-width: 700px; margin: 2rem auto; font-family: Arial, sans-serif; }
+
+    body {
+        min-height: 100vh;
+        font-family: monospace;
+        background: linear-gradient(135deg, #080808 0%, #0d1011 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-image: url("background.png");
+        background-attachment: fixed;
+        background-position-x: center;
+        color: white;
+    }
+    body {
+        overflow: auto;
+        scrollbar-width: none; /* Firefox */
+    }
+    code {
+        background-color: rgba(0,0,0,0.5);
+        border-radius: 4px;
+        border-color: rgba(100,100,100,0.5);
+        border-width: 1px;
+        border-style: solid;
+    }
+
+    .container {
+        background-color: rgba(0, 0, 0, 0.4);
+        background: rgba(0,0,0, 0.2);
+        box-shadow: 0 0 32px 8px rgba(10, 12, 20, 0.9);
+        border-radius: 16px;
+        border: 1px solid rgba(255,255,255,0.10);
+        padding: 2rem;
+        color: #fff;
+        max-width: 900px;
+        text-align: center;
+        margin: 1rem;
+        text-shadow: 0 0 8px rgba(255,255,255,0.3);
+        backdrop-filter: blur(8px);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+
+    p.description {
+      text-align: center;
+      font-size: 1rem;
+      color: #ccc;
+      margin-bottom: 2rem;
+    }
+
+    canvas {
+      margin-bottom: 3rem;
+      background-color: rgba(255, 255, 255, 0.1);
+      border: rgba(255,255,255,0.2) 1px solid;
+      border-radius: 15px;
+      padding: 1rem;
+    }
+    .dot-fade z {
+        opacity: 0;
+        animation: fadeDots 1s infinite ;
+        animation-delay: calc(var(--i) * 0.2s);
+        display: inline-block;
+    }
+
+    .dot-fade z:nth-child(1) { --i: 0; }
+    .dot-fade z:nth-child(2) { --i: 1; }
+    .dot-fade z:nth-child(3) { --i: 2; }
+
+    @keyframes fadeDots {
+        0%   { opacity: 0.2; transform: translateY(0px) scale(1); }
+        50%  { opacity: 1; transform: translateY(-4px) scale(1.3); }
+        100% { opacity: 0.2; transform: translateY(0px) scale(1); }
+    }
+    .mc-color-9 { 
+        color: #5555FF;
+        text-shadow: 0 0 4px rgba(85,85,255,var(--glow-power-low)), 0 0 8px rgba(85,85,255,var(--glow-power));
+    } /* Blue */
   </style>
 </head>
 <body>
-  <h1>Players & Servers Online (Last 7 Days)</h1>
-  <canvas id="hourlyChart" width="700" height="350"></canvas>
+  <div class="container">
+    <h1>Minefort Hourly Stats</h1>
+    <div><p class="description">This graph shows the number of players and servers online every hour over the last 7 days.</p></div>
+    <div style="margin-bottom:20px"><a href="/Minefort-Server-List/" class="mc-color-9">Return to home</a></div>
+
+    <canvas id="playerChart"></canvas>
+    <canvas id="serverChart"></canvas>
+    <div id="loading">Loading<span class="dot-fade"><z>.</z><z>.</z><z>.</z></span></div>
+  </div>
 
   <script>
-    async function loadChart() {
-      const res = await fetch('https://minefort-server-list-backend.onrender.com/api/stats/hourly');
-      const { labels, playerData, serverData } = await res.json();
+    async function loadData() {
+        const options = {
+            weekday: 'short',
+            hour: 'numeric',
+            hour12: true
+        };
 
-      const ctx = document.getElementById('hourlyChart').getContext('2d');
-      new Chart(ctx, {
+      const res = await fetch('https://minefort-server-list-backend.onrender.com/api/stats/hourly'); // Replace with your actual endpoint
+      const json = await res.json();
+
+      const timestamps = json.labels.map(timestamp => new Date(timestamp).toLocaleString('en-US',options));
+      const playerCounts = json.playerData;
+      const serverCounts = json.serverData;
+
+      const sharedOptions = {
         type: 'line',
-        data: {
-          labels,
-          datasets: [
-            {
-              label: 'Players Online',
-              data: playerData,
-              borderColor: 'rgba(54, 162, 235, 1)',
-              backgroundColor: 'rgba(54, 162, 235, 0.2)',
-              tension: 0.3,
-              fill: true,
-              yAxisID: 'y',
-            },
-            {
-              label: 'Servers Online',
-              data: serverData,
-              borderColor: 'rgba(255, 159, 64, 1)',
-              backgroundColor: 'rgba(255, 159, 64, 0.2)',
-              tension: 0.3,
-              fill: true,
-              yAxisID: 'y1',
-            },
-          ],
-        },
         options: {
           responsive: true,
-          interaction: {
-            mode: 'index',
-            intersect: false,
-          },
-          stacked: false,
-          scales: {
-            y: {
-              type: 'linear',
-              display: true,
-              position: 'left',
-              beginAtZero: true,
-              title: {
-                display: true,
-                text: 'Players',
-              },
-            },
-            y1: {
-              type: 'linear',
-              display: true,
-              position: 'right',
-              beginAtZero: true,
-              grid: {
-                drawOnChartArea: false, // only want grid lines on left y-axis
-              },
-              title: {
-                display: true,
-                text: 'Servers',
-              },
-            },
-            x: {
-              ticks: {
-                maxRotation: 90,
-                minRotation: 45,
-                maxTicksLimit: 24, // show max 24 labels to avoid clutter
-              },
-            },
-          },
           plugins: {
-            legend: {
-              position: 'top',
-            },
+            legend: { display: false },
             tooltip: {
               mode: 'index',
               intersect: false,
-            },
+            }
           },
+          scales: {
+            x: {
+              ticks: { color: '#ccc' },
+              grid: { color: 'rgba(255,255,255,0.1)' }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { color: '#ccc' },
+              grid: { color: 'rgba(255,255,255,0.1)' }
+            }
+          }
+        }
+      };
+
+      new Chart(document.getElementById('playerChart'), {
+        type: sharedOptions.type,
+        options: {
+            ...sharedOptions.options,
+            plugins: {
+                ...sharedOptions.options.plugins,
+                title: {
+                    text: "Players",
+                    display: true,
+                    color: 'rgb(255,255,255)',
+                    font: {family: 'monospace', size: 20}
+                }
+            }
         },
+        data: {
+          labels: timestamps,
+          datasets: [{
+            label: 'Players',
+            data: playerCounts,
+            borderColor: 'rgba(0, 200, 255, 0.9)',
+            backgroundColor: 'rgba(0, 200, 255, 0.2)',
+            fill: true,
+            tension: 0.3
+          }]
+        }
       });
+
+      new Chart(document.getElementById('serverChart'), {
+        type: sharedOptions.type,
+        options: {
+            ...sharedOptions.options,
+            plugins: {
+                ...sharedOptions.options.plugins,
+                title: {
+                    text: "Servers",
+                    display: true,
+                    color: 'rgb(255,255,255)',
+                    font: {family: 'monospace', size: 20}
+                }
+            }
+        },
+        data: {
+          labels: timestamps,
+          datasets: [{
+            label: 'Servers',
+            data: serverCounts,
+            borderColor: 'rgba(255, 100, 100, 0.9)',
+            backgroundColor: 'rgba(255, 100, 100, 0.2)',
+            fill: true,
+            tension: 0.3
+          }]
+        }
+      });
+      document.getElementById("loading").remove()
     }
 
-    loadChart();
+    loadData();
   </script>
 </body>
 </html>
