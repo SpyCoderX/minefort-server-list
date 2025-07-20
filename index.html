@@ -587,7 +587,7 @@
       window.addEventListener('DOMContentLoaded', function() {
         if (typeof minefortOnLoad === 'function') {
             buildLegend(document.getElementById('plan-legend'),document.getElementById('about-servers'));
-            minefortOnLoad(document.getElementById('server-list'),document.getElementById('about')).then(() => {
+            minefortOnLoad(document.getElementById('server-list'),document.getElementById('about'),false).then(() => {
                 setupPlayerTooltips();
                 document.querySelectorAll('.plan-legend-item').forEach(item => {
                     item.addEventListener('click', () => {
@@ -597,6 +597,19 @@
                 document.querySelectorAll('.server-item').forEach(item => {
                     item.addEventListener('click', () => {})
                 })
+                 setInterval(() => {
+                    minefortOnLoad(document.getElementById('server-list'),document.getElementById('about'),true).then(() => {
+                        setupPlayerTooltips();
+                        document.querySelectorAll('.plan-legend-item').forEach(item => {
+                            item.addEventListener('click', () => {
+                                item.classList.toggle('active');
+                            });
+                        });
+                        document.querySelectorAll('.server-item').forEach(item => {
+                            item.addEventListener('click', () => {})
+                        })
+                    });
+                }, 10_000);
             });
         }
         const tooltip = document.getElementById('global-tooltip');

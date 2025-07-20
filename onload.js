@@ -71,8 +71,8 @@ function buildLegend(legendElement,serverElement) {
 
 }
 
-async function minefortOnLoad(serverListElement, aboutElement) {
-    console.log('minefortOnLoad executing!');
+async function minefortOnLoad(serverListElement, aboutElement, silent) {
+    // console.log('minefortOnLoad executing!');
     if (!serverListElement) {
         console.error('Server list element not found.');
         return;
@@ -249,7 +249,9 @@ async function minefortOnLoad(serverListElement, aboutElement) {
     }
 
     async function fillServerList() {
-        serverListElement.innerHTML = '<div class="mc-color-7 server-list-info">Loading<span class="dot-fade"><z>.</z><z>.</z><z>.</z></span></div>';
+        if (!silent) {
+            serverListElement.innerHTML = '<div class="mc-color-7 server-list-info">Loading<span class="dot-fade"><z>.</z><z>.</z><z>.</z></span></div>';
+        }
         try {
             const servers = await fetchServers();
             if (!servers.length) {
