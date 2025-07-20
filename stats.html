@@ -85,6 +85,9 @@
         color: #5555FF;
         text-shadow: 0 0 4px rgba(85,85,255,var(--glow-power-low)), 0 0 8px rgba(85,85,255,var(--glow-power));
     } /* Blue */
+    .chart {
+      min-height: 300px;
+    }
   </style>
 </head>
 <body>
@@ -93,8 +96,8 @@
     <div><p class="description">This graph shows the number of players and servers online every hour over the last 7 days.</p></div>
     <div style="margin-bottom:20px"><a href="/Minefort-Server-List/" class="mc-color-9">Return to home</a></div>
 
-    <canvas id="playerChart"></canvas>
-    <canvas id="serverChart"></canvas>
+    <canvas id="playerChart" class="chart"></canvas>
+    <canvas id="serverChart" class="chart"></canvas>
     <div id="loading">Loading<span class="dot-fade"><z>.</z><z>.</z><z>.</z></span></div>
   </div>
 
