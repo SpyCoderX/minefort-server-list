@@ -8,20 +8,14 @@
   <style>
 
     body {
-        min-height: 100vh;
         font-family: monospace;
         background: linear-gradient(135deg, #080808 0%, #0d1011 100%);
-        display: flex;
-        justify-content: center;
-        align-items: center;
         background-image: url("background.png");
         background-attachment: fixed;
         background-position-x: center;
         color: white;
-    }
-    body {
-        overflow: auto;
-        scrollbar-width: none; /* Firefox */
+        overflow-x: hidden;
+        padding: 0;
     }
     code {
         background-color: rgba(0,0,0,0.5);
@@ -37,13 +31,14 @@
         box-shadow: 0 0 32px 8px rgba(10, 12, 20, 0.9);
         border-radius: 16px;
         border: 1px solid rgba(255,255,255,0.10);
-        padding: 2rem;
+        padding: 0.5rem;
         color: #fff;
-        max-width: 900px;
+        /* max-width: 900px; */
         text-align: center;
-        margin: 1rem;
+        margin: 0.5rem;
         text-shadow: 0 0 8px rgba(255,255,255,0.3);
         backdrop-filter: blur(8px);
+        /* width: 80vw + 4rem; */
     }
 
     h1 {
@@ -56,6 +51,7 @@
       font-size: 1rem;
       color: #ccc;
       margin-bottom: 2rem;
+      text-wrap-mode:wrap;
     }
 
     canvas {
@@ -86,7 +82,11 @@
         text-shadow: 0 0 4px rgba(85,85,255,var(--glow-power-low)), 0 0 8px rgba(85,85,255,var(--glow-power));
     } /* Blue */
     .chart {
-      min-height: 300px;
+      position: relative;
+      height: 300px;
+      margin-bottom: 20px;
+      max-width: 100%;
+      /* min-width: 100%; */
     }
   </style>
 </head>
@@ -94,11 +94,10 @@
   <div class="container">
     <h1>Minefort Hourly Stats</h1>
     <div><p class="description">This graph shows the number of players and servers online every hour over the last 7 days.</p></div>
-    <div style="margin-bottom:20px"><a href="/Minefort-Server-List/" class="mc-color-9">Return to home</a></div>
-
-    <canvas id="playerChart" class="chart"></canvas>
-    <canvas id="serverChart" class="chart"></canvas>
     <div id="loading">Loading<span class="dot-fade"><z>.</z><z>.</z><z>.</z></span></div>
+    <div style="margin-bottom:20px"><a href="/Minefort-Server-List/" class="mc-color-9">Return to home</a></div>
+    <div class="chart"><canvas id="playerChart"></canvas></div>
+    <div class="chart"><canvas id="serverChart"></canvas></div>
   </div>
 
   <script>
@@ -137,8 +136,9 @@
         type: 'line',
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           plugins: {
-              legend: { display: true,labels:{color: 'rgb(255,255,255)'} },
+              legend: { display: false,labels:{color: 'rgb(255,255,255)'} },
             tooltip: {
               mode: 'index',
               intersect: false,
