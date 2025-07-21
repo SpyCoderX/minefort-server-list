@@ -39,7 +39,7 @@ const glowColorsHover = rawColorValues.map(color => `rgba(${color.map(a => a*2).
 const glowColorsLegend = rawColorValues.map(color => `rgba(${color.map(a => a*2).join(",")}, 0.40)`);
 const fullColors = rawColorValues.map(color => `rgba(${color.map(a => a*2).join(",")}, 1)`);
 
-function buildLegend(legendElement,serverElement) {
+function buildLegend(legendElement,serverElement,customStyle) {
     if (!legendElement) {
         console.error('Legend element not found.');
         return;
@@ -68,8 +68,32 @@ function buildLegend(legendElement,serverElement) {
         const color = fullColors[index] || 'rgba(0,0,0,1)';
         return `${name.split(" ")[0]} <span class="servers-${name.split(" ")[0]} " style="color: ${color}; text-shadow: 0 0 8px ${color}, 0 0 4px ${color};"><span class="dot-fade"><z>.</z><z>.</z><z>.</z></span></span><br>`
     }).join("");
-
+    customStyle.innerHTML = Array.from(tags.entries()).map(([key,val]) => {
+        return `.tag-${key} {
+            background: linear-gradient(to right,rgba(${val.join(',')},0.8),rgba(100,100,100,0.5));
+            padding: 3px;
+            border-radius: 3px;
+            margin: 0 1px;
+        }`
+    }).join('');
 }
+const normal_text = "abcdefghijklmnopqrstuvwxyz";
+const small_caps = "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘǫʀsᴛᴜᴠᴡxʏᴢ";
+
+const tags = new Map([
+    ["Survival",[160,255,50]],
+    ["Creative",[50,50,255]],
+    ["Adventure",[255,100,50]],
+    ["Hardcore",[255,50,50]],
+    ["SMP",[0,255,0]],
+    ["PvP",[255,255,100]],
+    ["Gen",[100,255,200]],
+    ["Box",[200,200,200]],
+    ["SkyBlock",[100,100,255]],
+    ["Lifesteal",[200,50,50]],
+    ["Anarchy",[100,0,0]],
+    ["Minigame",[150,0,200]],
+    ["Economy",[200,150,0]]]);
 
 async function minefortOnLoad(serverListElement, aboutElement, silent) {
     // console.log('minefortOnLoad executing!');
@@ -173,6 +197,22 @@ async function minefortOnLoad(serverListElement, aboutElement, silent) {
         }
         return out;
     }
+    function stripMotd(motd) {
+        let out = '';
+        for (let index = 0; index < motd.length; index++) {
+            const element = motd[index];
+            if (element === "&" || element === "§") {
+                index++;
+                continue;
+            }
+            if (small_caps.includes(element)) {
+                out += normal_text[small_caps.indexOf(element)]
+            } else {
+                out += element;
+            }
+        }
+        return out;
+    }
 
     function createServerItem(server) {
         const players = server.players || {};
@@ -184,6 +224,7 @@ async function minefortOnLoad(serverListElement, aboutElement, silent) {
         const versionType = version[0] || 'Unknown';
         const versionNum = version[1] || '';
         const serverId = server.serverId || '';
+        const serverName = server.serverName;
         
         const planTier = planIndex !== -1 ? planIndex : 0;
         // Plan expandable in glassmorphic div, button themed, section glassy
@@ -191,15 +232,22 @@ async function minefortOnLoad(serverListElement, aboutElement, silent) {
         const copyIpBtn = `<button class="copy-ip-btn" title="Copy IP"><svg style="filter: drop-shadow(0px 0px 4px rgba(255,255,255, 1));" width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M208 0L332.1 0c12.7 0 24.9 5.1 33.9 14.1l67.9 67.9c9 9 14.1 21.2 14.1 33.9L448 336c0 26.5-21.5 48-48 48l-192 0c-26.5 0-48-21.5-48-48l0-288c0-26.5 21.5-48 48-48zM48 128l80 0 0 64-64 0 0 256 192 0 0-32 64 0 0 48c0 26.5-21.5 48-48 48L48 512c-26.5 0-48-21.5-48-48L0 176c0-26.5 21.5-48 48-48z"/></svg></button>`;
         const topRow = `<div class="server-top">
             ${iconImg}
-            <span class="server-name">${server.serverName}</span>
-            ${copyIpBtn}
+            <span class="server-name">${serverName}</span>
+             ${copyIpBtn}
         </div>`;
         const motdSection = `<div class="motd-glass">
             <span>${colorizeMotd(motd)}</span>
         </div>`;
-        const playerList = `<div class="player-list">
+        const playerList = players.online > 0 ? `<div class="player-list">
             ${players.list.map(player => `<div class="player-icon ${(!player.name)?"broken":""}" data-name="${player.name || 'Error loading username'}"><img class="empty-icon" src="empty.png" width="24" height="24"/><img class="actual-icon" src="https://avatars.minefort.com/avatar/${player.uuid}" width="24" height="24" alt="${player.uuid}" class="player-avatar" /></div>`).join('')}
-        </div>`;
+        </div>` : "";
+        
+        const strippedMotd = stripMotd(motd).toLowerCase();
+        let resolvedTags = Array.from(tags.keys()).filter(key =>  strippedMotd.includes(key.toString().toLowerCase()) || serverName.toLowerCase().includes(key.toString().toLowerCase()));
+        const tagList = resolvedTags.length > 0 ? `<div class="tag-list">
+            ${resolvedTags.map(key => `<div class="server-tag tag-${key}">${key}</div>`).join('')}
+        </div>` : "";
+        
         const bottomRow = `<div class="server-bottom">
             <div>
                 <span class="glow-2" style="font-weight:600;font-size:1em;">${versionType}</span>
@@ -243,6 +291,7 @@ async function minefortOnLoad(serverListElement, aboutElement, silent) {
             ${topRow}
             ${motdSection}
             ${playerList}
+            ${tagList}
             ${bottomRow}
           </div>
         `;
