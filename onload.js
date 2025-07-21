@@ -11,17 +11,38 @@ async function buildSearch(searchContainerElement) {
     }
     versions = (await res.json()).result;
     allVersions = new Map(versions.map(data => [data.name,data.versions]));
+    const allVersionNums = [];
+    Array.from(allVersions.values()).forEach(verList => verList.forEach(ver => {
+        if (!allVersionNums.includes(ver.id)) {
+            allVersionNums.push(ver.id);
+        }
+    }));
+    allVersionNums.sort((a,b) => {
+        const a1 = parseInt(a.split('.')[1],10);
+        const b1 = parseInt(b.split('.')[1],10);
+        if (a1 === b1) {
+            const a2 = parseInt(a.split('.')[2],10);
+            const b2 = parseInt(b.split('.')[2],10);
+            return b2-a2;
+        }
+        return b1-a1;
+    });
+    allVersions.set("Any",allVersionNums.map(idn => {
+        return {id:idn};
+    }));
     searchContainerElement.querySelector(".search-filters").innerHTML = `
     <select id="search-version-type" onchange="changeVersion(this)">
+        <option>Any</option>
         ${versions.map(data => `<option>${data.name}</option>`).join('')}
     </select>
     <select id="search-version-num">
-        ${versions[0].versions.map(version => `<option>${version.id}</option>`).join('')}
+        <option>Any</option>
+        ${allVersions.get("Any").map(version => `<option>${version.id}</option>`).join('')}
     </select>`;
 
 }
 function changeVersion(selectTypeElement) {
-    selectTypeElement.nextElementSibling.innerHTML = allVersions.get(selectTypeElement.value).map(version => `<option>${version.id}</option>`).join('')
+    selectTypeElement.nextElementSibling.innerHTML = '<option>Any</option>'+allVersions.get(selectTypeElement.value).map(version => `<option>${version.id}</option>`).join('')
 }
 
 const plans = {
