@@ -467,19 +467,137 @@
         }
 
         .search-field {
-            border-radius: 6px;
-            background-color: rgba(50,50,50,0.5);
+            border-radius: 8px;
+            background-color: rgba(100,100,255,0.2);
             color: white;
             width: 50%;
-            padding: 5px;
-            font-size: 16px;
+            padding: 10px;
+            font-size: 20px;
+            border-color: rgba(255,255,255,0.1);
+            border-width: 1px;
+            transition: background-color 0.1s;
+        }
+        .search-field:hover {
+            background-color: rgba(100,100,255,0.4);
+        }
+        .search-field:focus {
+            background-color: rgba(100,150,255,0.4);
+        }
+        .search-field::placeholder {
+            color: rgba(150,150,255,0.2);
+        }
+        .search-button {
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 20px;
+            background-color: rgba(100,150,255,0.4);
+            color:white;
+            border-color: rgba(255,255,255,0.1);
+            border-width: 1px;
+            transition: background-color 0.1s, transform 0.2s;
+            transform: none;
+        }
+        .search-button:hover {
+            background-color: rgba(100,150,255,0.6);
+            transform: translateY(-4px);
+        }
+        .search-button.pressed {
+            background-color: rgba(100,255,255,0.6);
+        }
+        .search-core {
+            margin: 5px;
         }
         #search-container {
-            margin: 2%;
+            margin: 10px;
+            background-color: rgba(100,150,255,0.2);
+            padding: 15px 5px;
+            border-radius: 15px;
+            border-color: rgba(255,255,255,0.1);
+            border-width: 1px;
+            border-style: solid;
+            box-shadow: 0 0 16px 0 rgba(255,255,255,0.1);
         }
         .search-filters {
             display: flex;
             flex-direction: row;
+            align-items: center;
+            justify-content: center;
+        }
+        .search-filters select {
+            border-radius: 4px;
+            padding: 5px;
+            font-size: 16px;
+            background-color: rgba(100,150,255,0.2);
+            color:white;
+            border-color: rgba(255,255,255,0.1);
+            border-width: 1px;
+        }
+        .search-filters select option {
+            background-color: rgba(0,50,100,1);
+            color: white;
+
+        }
+
+        #search-tags {
+            position: relative;
+            display: inline-block;
+        }
+        .tags-dropdown-button {
+            border-radius: 4px;
+            padding: 5px;
+            font-size: 16px;
+            background-color: rgba(100,150,255,0.2);
+            color:white;
+            border-color: rgba(255,255,255,0.1);
+            border-width: 1px;
+            margin: 0 5px;
+        }
+        #tag-dropdown {
+            display: block;
+            position: absolute;
+            background-color: rgba(50,50,150,0.6);
+            box-shadow: inset 0 0 16px 4px rgba(100,100,255,0.2);
+            min-width: 100px;
+            z-index: 1;
+            padding: 5px;
+            border-radius: 6px;
+            max-height: 0px;
+            opacity: 0;
+            overflow: hidden;
+            transition: opacity 0.4s, max-height 0.2s;
+        }
+        #tag-dropdown label {
+            display: block;
+            color: white;
+            margin: 6px 0;
+            height: 16px;
+        }
+        #tag-dropdown input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+        #tag-dropdown input[type="checkbox"] + span {
+            transition: filter 0.2s, width 0.2s;
+            display: inline-block;
+            justify-self: center;
+            justify-content: center;
+            width: 60%;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        #tag-dropdown input[type="checkbox"]:hover + span {
+            filter: brightness(1.5);
+        }
+        
+        #tag-dropdown input[type="checkbox"]:checked + span {
+            font-weight: bold;
+            width: 85%;
+        }
+        #search-tags.show #tag-dropdown {
+            display: block;
+            max-height: 300px;
+            opacity: 1;
         }
 
 
@@ -609,7 +727,11 @@
             </div>
         </div>
         <div id="search-container">
-            <input type="search" class="search-field"/>
+            <h2>Search</h2>
+            <div class="search-core">
+                <input type="text" class="search-field" placeholder="Generic Gens #144..."/>
+                <input type="button" value="Search" class="search-button"/>
+            </div>
             <div class="search-filters">
                 
             </div>
@@ -623,6 +745,7 @@
     <style id="custom"></style>
     <script src="onload.js"></script>
     <script>
+      
       window.addEventListener('DOMContentLoaded', function() {
         if (typeof minefortOnLoad === 'function') {
             buildLegend(document.getElementById('plan-legend'),document.getElementById('about-servers'),document.getElementById('custom'))
@@ -631,11 +754,12 @@
                     item.classList.toggle('active');
                 });
             });
-            buildSearch(document.getElementById('search-container'));
+            buildSearch(document.getElementById('search-container'),document);
             minefortOnLoad(document.getElementById('server-list'),document.getElementById('about'),false).then(() => {
                 setupPlayerTooltips();
                  setInterval(() => {
-                    minefortOnLoad(document.getElementById('server-list'),document.getElementById('about'),true);
+                    minefortOnLoad(document.getElementById('server-list'),document.getElementById('about'),true,global_filters);
+                    fetchServers();
                 }, 10_000);
             });
         }
@@ -664,7 +788,7 @@
 
                 icon.addEventListener('mouseleave', hideTooltip);
             });
-            const titles = document.querySelectorAll('.updated-server > .server-name');
+            const titles = document.querySelectorAll('.updated-server .server-name');
 
             titles.forEach(title => {
                 const titleName = title.innerHTML;

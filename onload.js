@@ -1,7 +1,14 @@
 
 let allVersions = new Map();
-
-async function buildSearch(searchContainerElement) {
+let global_filters = {};
+let global_servers;
+function toggleTagDropdown() {
+  document.getElementById('search-tags').classList.toggle('show');
+}
+function hideTagDropdown() {
+    document.getElementById('search-tags').classList.remove('show');
+}
+async function buildSearch(searchContainerElement,document) {
     let versions;
     let res;
     try {
@@ -31,6 +38,7 @@ async function buildSearch(searchContainerElement) {
         return {id:idn};
     }));
     searchContainerElement.querySelector(".search-filters").innerHTML = `
+    <label style="margin-right: 5px">Version</label>
     <select id="search-version-type" onchange="changeVersion(this)">
         <option>Any</option>
         ${versions.map(data => `<option>${data.name}</option>`).join('')}
@@ -38,9 +46,38 @@ async function buildSearch(searchContainerElement) {
     <select id="search-version-num">
         <option>Any</option>
         ${allVersions.get("Any").map(version => `<option>${version.id}</option>`).join('')}
-    </select>`;
-
+    </select>
+    <div id="search-tags">
+        <button onclick="toggleTagDropdown()" class="tags-dropdown-button">Select Tags</button>
+        <div id="tag-dropdown">${Array.from(tags.keys()).sort().map(key => `<label><input type="checkbox" value="${key}"> <span class="tag-${key}">${key}</span></label>`).join('')}</div>
+    </div>`;
+    const versionType = searchContainerElement.querySelector("#search-version-type");
+    const versionNum = searchContainerElement.querySelector("#search-version-num");
+    const searchElem = searchContainerElement.querySelector(".search-field");
+    const button = searchContainerElement.querySelector('.search-button');
+    const tagChecks = Array.from(searchContainerElement.querySelectorAll('#tag-dropdown input[type="checkbox"]'));
+    const initiateSearch = () => {
+        global_filters = {search:searchElem.value,
+            version:{type:versionType.value!=="Any"?versionType.value:null,
+                number:versionNum.value!=="Any"?versionNum.value:null},
+            tags:tagChecks.filter(cb => cb.checked).map(cb => cb.value)}
+        minefortOnLoad(document.getElementById('server-list'),document.getElementById('about'),true,global_filters);
+    }
+    button.addEventListener('mousedown', () => {
+        button.classList.add('pressed');
+        initiateSearch();
+        setTimeout(() => {
+            button.classList.remove('pressed');
+        },100)
+    });
+    searchElem.addEventListener('input', initiateSearch);
+    versionType.addEventListener('input', initiateSearch);
+    versionNum.addEventListener('input',initiateSearch);
+    tagChecks.forEach(cb => {
+        cb.addEventListener('change', initiateSearch);
+    });
 }
+
 function changeVersion(selectTypeElement) {
     selectTypeElement.nextElementSibling.innerHTML = '<option>Any</option>'+allVersions.get(selectTypeElement.value).map(version => `<option>${version.id}</option>`).join('')
 }
@@ -171,7 +208,46 @@ const tags = new Map([
     ["Anarchy",[100,0,0]],
     ["Minigame",[150,0,200]],
     ["Economy",[200,150,0]]]);
-
+async function fetchServers() {
+    const url = "https://minefort-server-list-backend.onrender.com/api/servers";
+    let payload = {
+        pagination: { skip: 0, limit: 1 },
+        sort: { field: "players.online", order: "desc" }
+    };
+    const headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    };
+    // Get total count
+    let res = await fetch(url, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload)
+    });
+    // console.log('First API response:', res.body);
+    let data = await res.json();
+    // console.log('First API response:', data);
+    const total = data.pagination?.total || 0;
+    if (!total) return;
+    // Fetch all servers
+    payload = {
+        pagination: { skip: 0, limit: total },
+        sort: { field: "players.online", order: "desc" }
+    };
+    res = await fetch(url, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload)
+    });
+    data = await res.json();
+    // console.log('Second API response:', data);
+    if (data.result && Array.isArray(data.result)) {
+        global_servers = data.result;
+    } else {
+        console.warn('No result array found in API response:', data);
+        return;
+    }
+}
 async function minefortOnLoad(serverListElement, aboutElement, update, filter={}) {
     // console.log('minefortOnLoad executing!');
     if (!serverListElement) {
@@ -181,46 +257,7 @@ async function minefortOnLoad(serverListElement, aboutElement, update, filter={}
 
     
 
-    async function fetchServers() {
-        const url = "https://minefort-server-list-backend.onrender.com/api/servers";
-        let payload = {
-            pagination: { skip: 0, limit: 1 },
-            sort: { field: "players.online", order: "desc" }
-        };
-        const headers = {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        };
-        // Get total count
-        let res = await fetch(url, {
-            method: "POST",
-            headers,
-            body: JSON.stringify(payload)
-        });
-        // console.log('First API response:', res.body);
-        let data = await res.json();
-        // console.log('First API response:', data);
-        const total = data.pagination?.total || 0;
-        if (!total) return [];
-        // Fetch all servers
-        payload = {
-            pagination: { skip: 0, limit: total },
-            sort: { field: "players.online", order: "desc" }
-        };
-        res = await fetch(url, {
-            method: "POST",
-            headers,
-            body: JSON.stringify(payload)
-        });
-        data = await res.json();
-        // console.log('Second API response:', data);
-        if (data.result && Array.isArray(data.result)) {
-            return data.result;
-        } else {
-            console.warn('No result array found in API response:', data);
-            return [];
-        }
-    }
+    
 
     // Colorize Minecraft MOTD (&-codes)
     function colorizeMotd(motd) {
@@ -350,8 +387,9 @@ async function minefortOnLoad(serverListElement, aboutElement, update, filter={}
         const searchText = filter?.search;
         const versionType = filter?.version?.type;
         const versionNum = filter?.version?.number;
+        const tagList = filter?.tags;
         if (searchText) {
-            if (!(server.serverName.includes(searchText) || stripMotd(server.motd).includes(searchText))) {
+            if (!(server.serverName.includes(searchText) || stripMotd(server.messageOfTheDay).includes(searchText))) {
                 return false;
             }
         }
@@ -365,6 +403,11 @@ async function minefortOnLoad(serverListElement, aboutElement, update, filter={}
                 return false;
             }
         }
+        if (tagList) {
+            if (!tagList.every(key => stripMotd(server.messageOfTheDay).includes(key.toString().toLowerCase()) || server.serverName.toLowerCase().includes(key.toString().toLowerCase()))) {
+                return false;
+            }
+        }
         return true;
     }
 
@@ -373,7 +416,10 @@ async function minefortOnLoad(serverListElement, aboutElement, update, filter={}
             serverListElement.innerHTML = '<div class="mc-color-7 server-list-info">Loading<span class="dot-fade"><z>.</z><z>.</z><z>.</z></span></div>';
         }
         try {
-            const servers = await fetchServers();
+            if (!global_servers) {
+                await fetchServers();
+            }
+            const servers = global_servers;
             if (!servers.length) {
                 serverListElement.innerHTML = '<div class="mc-color-c server-list-info">No servers found.</div>';
                 return;
