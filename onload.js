@@ -1,3 +1,29 @@
+
+let allVersions = new Map();
+
+async function buildSearch(searchContainerElement) {
+    let versions;
+    let res;
+    try {
+        res = await fetch('https://minefort-server-list-backend.onrender.com/api/versions',{method: 'GET'});
+    } catch {
+        res = await fetch('versions.json');
+    }
+    versions = (await res.json()).result;
+    allVersions = new Map(versions.map(data => [data.name,data.versions]));
+    searchContainerElement.querySelector(".search-filters").innerHTML = `
+    <select id="search-version-type" onchange="changeVersion(this)">
+        ${versions.map(data => `<option>${data.name}</option>`).join('')}
+    </select>
+    <select id="search-version-num">
+        ${versions[0].versions.map(version => `<option>${version.id}</option>`).join('')}
+    </select>`;
+
+}
+function changeVersion(selectTypeElement) {
+    selectTypeElement.nextElementSibling.innerHTML = allVersions.get(selectTypeElement.value).map(version => `<option>${version.id}</option>`).join('')
+}
+
 const plans = {
     10: "Hut (free)",
     35: "Cottage (T1)",
@@ -75,6 +101,36 @@ function buildLegend(legendElement,serverElement,customStyle) {
             border-radius: 3px;
             margin: 0 1px;
         }`
+    }).join('') + 
+    Object.entries(plans).map(([key,name], index) => {
+        const color = planColors[index];
+        const glowColor = glowColorsHover[index];
+        const hover = planColorsHover[index];
+        return `.server-item-${name.split(' ')[0]} {
+              background: ${color};
+              border-radius: 12px;
+              padding: 1.2rem 1.1rem 1.1rem 1.1rem;
+              box-shadow: 0 4px 16px 0 rgba(0,0,0,0.18), 0 0 0 1px rgba(255,255,255,0.08), inset 0 0 8px 2px rgba(255,255,255,0.13), inset 0 0 32px 4px rgba(80,180,255,0.08);
+              display: flex;
+              flex-direction: column;
+              position: relative;
+              text-align: left;
+              transition: box-shadow 0.2s, transform 0.2s, background 0.2s;
+              overflow: visible;
+              box-shadow:
+                0 4px 16px 0 rgba(0,0,0,0.18),
+                0 0 0 1px rgba(255,255,255,0.08),
+                inset 0 0 8px 8px rgba(0,0,0,0.1),
+                inset 0 0 16px 24px rgba(0,0,0,0.05);
+            }
+            .server-item-${name.split(' ')[0]}:hover {
+              background: ${hover};
+              box-shadow:
+                0 8px 16px 4px rgba(0,0,0,0.26),
+                0 0 0 1px rgba(255,255,255,0.08),
+                inset 0 0 4px 0px ${glowColor},
+                inset 0 0 16px 2px ${glowColor};
+            }`
     }).join('');
 }
 const normal_text = "abcdefghijklmnopqrstuvwxyz";
@@ -95,7 +151,7 @@ const tags = new Map([
     ["Minigame",[150,0,200]],
     ["Economy",[200,150,0]]]);
 
-async function minefortOnLoad(serverListElement, aboutElement, silent) {
+async function minefortOnLoad(serverListElement, aboutElement, update, filter={}) {
     // console.log('minefortOnLoad executing!');
     if (!serverListElement) {
         console.error('Server list element not found.');
@@ -120,9 +176,9 @@ async function minefortOnLoad(serverListElement, aboutElement, silent) {
             headers,
             body: JSON.stringify(payload)
         });
-        console.log('First API response:', res.body);
+        // console.log('First API response:', res.body);
         let data = await res.json();
-        console.log('First API response:', data);
+        // console.log('First API response:', data);
         const total = data.pagination?.total || 0;
         if (!total) return [];
         // Fetch all servers
@@ -136,7 +192,7 @@ async function minefortOnLoad(serverListElement, aboutElement, silent) {
             body: JSON.stringify(payload)
         });
         data = await res.json();
-        console.log('Second API response:', data);
+        // console.log('Second API response:', data);
         if (data.result && Array.isArray(data.result)) {
             return data.result;
         } else {
@@ -213,6 +269,9 @@ async function minefortOnLoad(serverListElement, aboutElement, silent) {
         }
         return out;
     }
+    function createPlayer(player) {
+        return `<div class="player-icon ${(!player.name)?"broken":""} updated-player" data-name="${player.name || 'Error loading username'}" data-uuid="${player.uuid}"><img class="empty-icon" src="empty.png" width="24" height="24"/><img class="actual-icon" src="https://avatars.minefort.com/avatar/${player.uuid}" width="24" height="24" alt="${player.uuid}" class="player-avatar" /></div>`;
+    }
 
     function createServerItem(server) {
         const players = server.players || {};
@@ -239,7 +298,7 @@ async function minefortOnLoad(serverListElement, aboutElement, silent) {
             <span>${colorizeMotd(motd)}</span>
         </div>`;
         const playerList = players.online > 0 ? `<div class="player-list">
-            ${players.list.map(player => `<div class="player-icon ${(!player.name)?"broken":""}" data-name="${player.name || 'Error loading username'}"><img class="empty-icon" src="empty.png" width="24" height="24"/><img class="actual-icon" src="https://avatars.minefort.com/avatar/${player.uuid}" width="24" height="24" alt="${player.uuid}" class="player-avatar" /></div>`).join('')}
+            ${players.list.map(createPlayer).join('')}
         </div>` : "";
         
         const strippedMotd = stripMotd(motd).toLowerCase();
@@ -253,41 +312,11 @@ async function minefortOnLoad(serverListElement, aboutElement, silent) {
                 <span class="glow-2" style="font-weight:600;font-size:1em;">${versionType}</span>
                 ${versionNum ? `<span class="glow-3" style="font-size:0.97em;color:#b0b3b8;">${versionNum}</span>` : ''}
             </div>
-            <div class="glow-2" style="font-weight:600;font-size:1em;"><p>${players.online ?? '?'} <span class="glow-3 mc-color-7">/ ${players.max ?? '?'}</span></p></div>
+            <div class="glow-2" style="font-weight:600;font-size:1em;"><p><span class="online-players">${players.online ?? '?'}</span> <span class="glow-3 mc-color-7">/ ${players.max ?? '?'}</span></p></div>
         </div>`;
-        const uniqueId = `server-item-${serverId}`;
-        const styleBlock = `
-          <style>
-            .${uniqueId} {
-              background: ${planColors[planTier]};
-              border-radius: 12px;
-              padding: 1.2rem 1.1rem 1.1rem 1.1rem;
-              box-shadow: 0 4px 16px 0 rgba(0,0,0,0.18), 0 0 0 1px rgba(255,255,255,0.08), inset 0 0 8px 2px rgba(255,255,255,0.13), inset 0 0 32px 4px rgba(80,180,255,0.08);
-              display: flex;
-              flex-direction: column;
-              position: relative;
-              text-align: left;
-              transition: box-shadow 0.2s, transform 0.2s, background 0.2s;
-              overflow: visible;
-              box-shadow:
-                0 4px 16px 0 rgba(0,0,0,0.18),
-                0 0 0 1px rgba(255,255,255,0.08),
-                inset 0 0 8px 8px rgba(0,0,0,0.1),
-                inset 0 0 16px 24px rgba(0,0,0,0.05);
-            }
-            .${uniqueId}:hover {
-              background: ${planColorsHover[planTier]};
-              box-shadow:
-                0 8px 16px 4px rgba(0,0,0,0.26),
-                0 0 0 1px rgba(255,255,255,0.08),
-                inset 0 0 4px 0px ${glowColorsHover[planTier]},
-                inset 0 0 16px 2px ${glowColorsHover[planTier]};
-            }
-          </style>
-        `;
+        
         return `
-          ${styleBlock}
-          <div class="server-item ${uniqueId}" data-plan-tier="${planTier}">
+          <div class="server-item server-item-${plans[planKey].split(' ')[0]} updated-server" data-plan-tier="${planTier}" data-player-count="${players.online}">
             ${topRow}
             ${motdSection}
             ${playerList}
@@ -296,9 +325,30 @@ async function minefortOnLoad(serverListElement, aboutElement, silent) {
           </div>
         `;
     }
+    function filterServerItem(server) {
+        const searchText = filter?.search;
+        const versionType = filter?.version?.type;
+        const versionNum = filter?.version?.number;
+        if (searchText) {
+            if (!(server.serverName.includes(searchText) || stripMotd(server.motd).includes(searchText))) {
+                return false;
+            }
+        }
+        if (versionType) {
+            if (!(server.version.split('-')[0].toLowerCase() == versionType.toLowerCase())) {
+                return false;
+            }
+        }
+        if (versionNum) {
+            if (!(server.version.split('-')[1] === versionNum)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     async function fillServerList() {
-        if (!silent) {
+        if (!update) {
             serverListElement.innerHTML = '<div class="mc-color-7 server-list-info">Loading<span class="dot-fade"><z>.</z><z>.</z><z>.</z></span></div>';
         }
         try {
@@ -346,13 +396,71 @@ async function minefortOnLoad(serverListElement, aboutElement, silent) {
             Object.entries(plans).forEach(([key,name]) => {
                 aboutElement.querySelector(`.servers-${name.split(" ")[0]}`).innerHTML = `${servers_to_plan.get(parseInt(key))} (${Math.round(servers_to_plan.get(parseInt(key))/total_servers*1000)/10}%)`;
             });
+            if (update) {
+                let filteredServers = servers.filter(filterServerItem);
+                serverListElement.querySelectorAll('.server-item').forEach(item => {
+                    const name = item.querySelector('.server-name').innerHTML;
+                    const thisServer = filteredServers.filter(server => server.serverName === name)[0];
+                    if (!thisServer) {
+                        item.remove();
+                        return;
+                    }
+                    const playerCount = item.querySelector('.online-players');
+                    playerCount.innerHTML = thisServer.players.online;
+                    item.setAttribute('data-player-count',thisServer.players.online);
+                    const playerList = item.querySelector('.player-list');
+                    let players = thisServer.players.list;
+                    if (playerList) {
+                        if (players.length === 0) {
+                            playerList.remove();
+                        } else {
+                            Array.from(playerList.children).forEach(icon => {
+                                const uuid = icon.getAttribute('data-uuid');
+                                const thisPlayer = players.filter(pl => pl.uuid === uuid);
+                                if (!thisPlayer) {
+                                    icon.remove();
+                                }
+                                if (icon.getAttribute('data-name') !== thisPlayer.name) {
+                                    icon.setAttribute('data-name',thisPlayer.name);
+                                }
+                                icon.classList.remove('updated-player');
+                                players = players.filter(pl => pl.uuid !== uuid);
+                            });
+                            playerList.insertAdjacentHTML('beforeend',players.map(createPlayer).join(''));
+                        }
+                    } else if (players.length > 0) {
+                        const motd = item.querySelector('.motd-glass');
+                        motd.insertAdjacentHTML('afterend',`<div class="player-list">${players.map(createPlayer).join('')}</div>`)
+                    }
+                    item.classList.remove('updated-server');
 
-            serverListElement.innerHTML = servers.map(createServerItem).join("");
-            serverListElement.style.height = serverListElement.scrollHeight + "px";
-            serverListElement.addEventListener('transitionend', () => {
-                serverListElement.style.height = "auto"; // Reset height to auto after transition
-                serverListElement.style.overflow = "visible";
-            });
+                    filteredServers = filteredServers.filter(server => server.serverName!==name);
+                });
+                serverListElement.insertAdjacentHTML('beforeend',filteredServers.map(createServerItem).join(''));
+
+                const children = Array.from(serverListElement.children);
+
+                // 2. Sort the array by player count
+                children.sort((a, b) => {
+                const aCount = parseInt(a.getAttribute('data-player-count'), 10);
+                const bCount = parseInt(b.getAttribute('data-player-count'), 10);
+                return bCount - aCount; // descending
+                });
+
+                // 3. Append in new order (this moves DOM elements instead of recreating them)
+                children.forEach(server => serverListElement.appendChild(server));
+
+            } else {
+                serverListElement.innerHTML = servers.filter(filterServerItem).map(createServerItem).join("");
+                serverListElement.style.height = serverListElement.scrollHeight + "px";
+                serverListElement.addEventListener('transitionend', () => {
+                    serverListElement.style.height = "auto"; // Reset height to auto after transition
+                    serverListElement.style.overflow = "visible";
+                });
+                
+            }
+            
+            console.log("updated server list")
 
 
             // Attach all event listeners after DOM update
