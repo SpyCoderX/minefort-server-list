@@ -532,6 +532,7 @@ async function minefortOnLoad(serverListElement, aboutElement, update, filter={}
                                 }
                                 if (icon.getAttribute('data-name') !== thisPlayer.name && thisPlayer.name) {
                                     icon.setAttribute('data-name',thisPlayer.name);
+                                    icon.classList.remove('broken');
                                 }
                                 icon.classList.remove('updated-player');
                                 players = players.filter(pl => pl.uuid !== uuid);
