@@ -760,61 +760,15 @@
             });
             buildSearch(document.getElementById('search-container'),document);
             minefortOnLoad(document.getElementById('server-list'),document.getElementById('about'),false).then(() => {
-                setupPlayerTooltips();
                  setInterval(() => {
                     minefortOnLoad(document.getElementById('server-list'),document.getElementById('about'),true,global_filters);
                     fetchServers();
                 }, 10_000);
             });
         }
-        const tooltip = document.getElementById('global-tooltip');
-
-        function showTooltip(text, x, y) {
-            tooltip.innerHTML = text;
-            tooltip.style.left = (x-tooltip.offsetWidth/2) + 'px';
-            tooltip.style.top =  (y-tooltip.offsetHeight) + 'px';
-            tooltip.style.opacity = 1;
-        }
-    
-        function hideTooltip() {
-            tooltip.style.opacity = 0;
-        }
-
-        function setupPlayerTooltips() {
-            const icons = document.querySelectorAll('.updated-player');
-
-            icons.forEach(icon => {
-                const playerName = icon.getAttribute('data-name'); // set this attribute below
-
-                icon.addEventListener('mousemove', e => {
-                showTooltip(playerName, e.pageX, e.pageY);
-                });
-
-                icon.addEventListener('mouseleave', hideTooltip);
-            });
-            const titles = document.querySelectorAll('.updated-server .server-name');
-
-            titles.forEach(title => {
-                const titleName = title.innerHTML;
-                title.addEventListener('mousemove', e => {
-                    showTooltip(`<span style="font-size: 16px;">${titleName}</span>`, e.pageX, e.pageY);
-                });
-                title.addEventListener('mouseleave', hideTooltip);
-            })
-        }
+        
         document.querySelector("body").addEventListener('click',() => {})
         document.querySelector(".glass-container").addEventListener('click',() => {})
-
-        // // Delegate click for motd toggles
-        // document.getElementById('server-list').addEventListener('click', function(e) {
-        //   if (e.target.classList.contains('motd-toggle-btn')) {
-        //     const motd = e.target.closest('.server-item').querySelector('.motd-glass');
-        //     if (motd) {
-        //       motd.classList.toggle('active');
-        //       e.target.textContent = motd.classList.contains('active') ? 'Hide MOTD' : 'Show MOTD';
-        //     }
-        //   }
-        // });
       });
     </script>
 </body>

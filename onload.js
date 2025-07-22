@@ -2,6 +2,44 @@
 let allVersions = new Map();
 let global_filters = {};
 let global_servers;
+
+const tooltip = document.getElementById('global-tooltip');
+
+function showTooltip(text, x, y) {
+    tooltip.innerHTML = text;
+    tooltip.style.left = (x-tooltip.offsetWidth/2) + 'px';
+    tooltip.style.top =  (y-tooltip.offsetHeight) + 'px';
+    tooltip.style.opacity = 1;
+}
+
+function hideTooltip() {
+    tooltip.style.opacity = 0;
+}
+
+function setupPlayerTooltips() {
+    const icons = document.querySelectorAll('.updated-player');
+
+    icons.forEach(icon => {
+        const playerName = icon.getAttribute('data-name'); // set this attribute below
+
+        icon.addEventListener('mousemove', e => {
+        showTooltip(playerName, e.pageX, e.pageY);
+        });
+
+        icon.addEventListener('mouseleave', hideTooltip);
+        icon.classList.remove('updated-player');
+    });
+    const titles = document.querySelectorAll('.updated-server .server-name');
+
+    titles.forEach(title => {
+        const titleName = title.innerHTML;
+        title.addEventListener('mousemove', e => {
+            showTooltip(`<span style="font-size: 16px;">${titleName}</span>`, e.pageX, e.pageY);
+        });
+        title.addEventListener('mouseleave', hideTooltip);
+    })
+    document.querySelectorAll('.updated-server').forEach(item => item.classList.remove('updated-server'))
+}
 function toggleTagDropdown() {
   document.getElementById('search-tags').classList.toggle('show');
 }
@@ -499,7 +537,7 @@ async function minefortOnLoad(serverListElement, aboutElement, update, filter={}
                         const motd = item.querySelector('.motd-glass');
                         motd.insertAdjacentHTML('afterend',`<div class="player-list">${players.map(createPlayer).join('')}</div>`)
                     }
-                    item.classList.remove('updated-server');
+                    
 
                     filteredServers = filteredServers.filter(server => server.serverName!==name);
                 });
@@ -550,5 +588,6 @@ async function minefortOnLoad(serverListElement, aboutElement, update, filter={}
     }
 
     await fillServerList();
+    setupPlayerTooltips();
 }
 
