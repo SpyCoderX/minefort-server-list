@@ -245,7 +245,8 @@ const tags = new Map([
     ["Lifesteal",[200,50,50]],
     ["Anarchy",[100,0,0]],
     ["Minigame",[150,0,200]],
-    ["Economy",[200,150,0]]]);
+    ["Economy",[200,150,0]],
+    ["OneBlock",[50,150,50]]]);
 async function fetchServers() {
     const url = "https://minefort-server-list-backend.onrender.com/api/servers";
     let payload = {
