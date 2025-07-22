@@ -503,10 +503,13 @@ async function minefortOnLoad(serverListElement, aboutElement, update, filter={}
             });
             if (update) {
                 let filteredServers = servers.filter(filterServerItem);
+                const serverItems = new Map(Array.from(serverListElement.querySelectorAll('.server-item')).map(item => [item,item.getBoundingClientRect()]));
+
                 serverListElement.querySelectorAll('.server-item').forEach(item => {
                     const name = item.querySelector('.server-name').innerHTML;
                     const thisServer = filteredServers.filter(server => server.serverName === name)[0];
                     if (!thisServer) {
+                        serverItems.set(item,null);
                         item.remove();
                         return;
                     }
@@ -554,6 +557,27 @@ async function minefortOnLoad(serverListElement, aboutElement, update, filter={}
 
                 // 3. Append in new order (this moves DOM elements instead of recreating them)
                 children.forEach(server => serverListElement.appendChild(server));
+
+                Array.from(serverItems.entries()).forEach(([item,first]) => {
+                    if (!first) return;
+
+                    const last = item.getBoundingClientRect(); 
+
+                    const dx = first.left - last.left;
+                    const dy = first.top - last.top;
+
+                    item.style.transform = `translate(${dx}px, ${dy}px)`;
+                    item.style.transition = 'transform 0s';
+
+                    // Trigger reflow
+                    requestAnimationFrame(() => {
+                        item.style.transform = '';
+                        item.style.transition = 'transform 0.8s ease';
+                        setTimeout(() => {
+                            item.style.transition = '';
+                        }, 800)
+                    });
+                })
 
             } else {
                 serverListElement.innerHTML = servers.filter(filterServerItem).map(createServerItem).join("");
