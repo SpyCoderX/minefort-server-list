@@ -528,6 +528,7 @@ async function minefortOnLoad(serverListElement, aboutElement, update, filter={}
                                 const thisPlayer = players.filter(pl => pl.uuid === uuid)[0];
                                 if (!thisPlayer) {
                                     icon.remove();
+                                    return;
                                 }
                                 if (icon.getAttribute('data-name') !== thisPlayer.name && thisPlayer.name) {
                                     icon.setAttribute('data-name',thisPlayer.name);
