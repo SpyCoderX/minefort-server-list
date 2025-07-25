@@ -3,8 +3,7 @@ const antiXSS = new Map([
     ['<','&lt;'],
     ['>','&gt;'],
     ["'", '&#x27;'],
-    ['"','&quot;'],
-    ['&','&amp;']
+    ['"','&quot;']
 ]);
 
 function purify(string) {
@@ -327,6 +326,7 @@ async function minefortOnLoad(serverListElement, aboutElement, update, filter={}
     // Colorize Minecraft MOTD (&-codes)
     function colorizeMotd(motd) {
         if (!motd) return '';
+        motd = purify(motd);
         const colorMap = {
             '0': 'mc-color-0', '1': 'mc-color-1', '2': 'mc-color-2', '3': 'mc-color-3',
             '4': 'mc-color-4', '5': 'mc-color-5', '6': 'mc-color-6', '7': 'mc-color-7',
@@ -374,7 +374,7 @@ async function minefortOnLoad(serverListElement, aboutElement, update, filter={}
             out += '</span>';
             openTags.pop();
         }
-        return purify(out);
+        return out;
     }
     function stripMotd(motd) {
         let out = '';
