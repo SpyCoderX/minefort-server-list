@@ -1,4 +1,29 @@
 
+const antiXSS = new Map([
+    ['<','&lt;'],
+    ['>','&gt;'],
+    ["'", '&#x27;'],
+    ['"','&quot;'],
+    ['&','&amp;']
+]);
+
+function purify(string) {
+    let out = '';
+    for (let i = 0; i < string.length; i++) {
+        const char = string[i];
+        if (antiXSS.has(char)) {
+            out += antiXSS.get(char)
+        } else {
+            out += char;
+        }
+        
+    }
+    return out;
+}
+
+
+
+
 let allVersions = new Map();
 let global_filters = {};
 let global_servers;
@@ -308,7 +333,7 @@ async function minefortOnLoad(serverListElement, aboutElement, update, filter={}
             'c': 'mc-color-c', 'd': 'mc-color-d', 'e': 'mc-color-e', 'f': 'mc-color-f'
         };
         const formatMap = {
-            'l': 'mc-bold', 'o': 'mc-italic', 'n': 'mc-underline', 'm': 'mc-strikethrough'
+            'l': 'mc-bold', 'o': 'mc-italic', 'n': 'mc-underline', 'm': 'mc-strikethrough', 'k' : 'mc-obfuscated'
         };
         let openTags = [];
         let out = '';
@@ -348,7 +373,7 @@ async function minefortOnLoad(serverListElement, aboutElement, update, filter={}
             out += '</span>';
             openTags.pop();
         }
-        return out;
+        return purify(out);
     }
     function stripMotd(motd) {
         let out = '';
@@ -367,7 +392,7 @@ async function minefortOnLoad(serverListElement, aboutElement, update, filter={}
         return out;
     }
     function createPlayer(player) {
-        return `<div class="player-icon ${(!player.name)?"broken":""} updated-player" data-name="${player.name || 'Error loading username'}" data-uuid="${player.uuid}"><img class="empty-icon" src="empty.png" width="24" height="24"/><img class="actual-icon" src="https://avatars.minefort.com/avatar/${player.uuid}" width="24" height="24" alt="${player.uuid}" class="player-avatar" /></div>`;
+        return `<div class="player-icon ${purify(!player.name)?"broken":""} updated-player" data-name="${purify(player.name) || 'Error loading username'}" data-uuid="${purify(player.uuid)}"><img class="empty-icon" src="empty.png" width="24" height="24"/><img class="actual-icon" src="https://avatars.minefort.com/avatar/${purify(player.uuid)}" width="24" height="24" alt="${purify(player.uuid)}" class="player-avatar" /></div>`;
     }
 
     function createServerItem(server) {

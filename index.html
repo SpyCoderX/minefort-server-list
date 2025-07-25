@@ -690,6 +690,13 @@
         .mc-italic { font-style: italic; }
         .mc-underline { text-decoration: underline; }
         .mc-strikethrough { text-decoration: line-through; }
+        .mc-obfuscated { animation: flashOpacity 0.1s infinite; }
+        @keyframes flashOpacity {
+            0%   { opacity: 1; filter:blur(1px); }
+            50% { opacity: 0.5; filter:blur(2px); }
+            100%   { opacity: 1; filter:blur(1px); }
+        }
+
     </style>
 </head>
 <body>
