@@ -8,6 +8,7 @@ const antiXSS = new Map([
 ]);
 
 function purify(string) {
+    if (string == null) return null;
     let out = '';
     for (let i = 0; i < string.length; i++) {
         const char = string[i];
