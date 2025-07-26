@@ -629,7 +629,7 @@ async function minefortOnLoad(serverListElement, aboutElement, update, filter={}
                         item.classList.add('copied');
                         setTimeout(() => {
                             item.classList.remove('copied');
-                        }, 400);
+                        }, 600);
                     });
                 });
             });
