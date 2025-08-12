@@ -26,8 +26,10 @@
     }
 
     .container {
-        background-color: rgba(0, 0, 0, 0.4);
-        background: rgba(0,0,0, 0.2);
+        background-image: url("background_blurred.png"); /*rgba(0,0,0, 0.2);*/
+        background-attachment: fixed;
+        background-size: cover;
+        background-position-x: center;
         box-shadow: 0 0 32px 8px rgba(10, 12, 20, 0.9);
         border-radius: 16px;
         border: 1px solid rgba(255,255,255,0.10);
@@ -37,7 +39,6 @@
         text-align: center;
         margin: 0.5rem;
         text-shadow: 0 0 8px rgba(255,255,255,0.3);
-        backdrop-filter: blur(8px);
         /* width: 80vw + 4rem; */
     }
 
