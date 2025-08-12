@@ -16,6 +16,7 @@
             align-items: center;
             background-image: url("background.png");
             background-attachment: fixed;
+            background-size: cover;
             background-position-x: center;
         }
         body {
@@ -88,7 +89,7 @@
             /* visibility: visible; */
         }
         .plan-details {
-            filter: blur(8px);
+            filter: blur(0px);
             display: flex;
             /* flex-direction: column; */
             align-items: center;
@@ -175,7 +176,10 @@
 
 
         .glass-container {
-            background: rgba(0,0,0, 0.2);
+            background-image: url("background_blurred.png"); /*rgba(0,0,0, 0.2);*/
+            background-attachment: fixed;
+            background-size: cover;
+            background-position-x: center;
             box-shadow: 0 0 32px 8px rgba(10, 12, 20, 0.9);
             border-radius: 16px;
             border: 1px solid rgba(255,255,255,0.10);
@@ -186,7 +190,6 @@
             text-align: center;
             margin: 10px;
             text-shadow: 0 0 8px rgba(255,255,255,0.3);
-            backdrop-filter: blur(8px);
         }
         h1 {
             font-size: 2.5rem;
@@ -228,7 +231,7 @@
             height: 24rem;
             min-height: 24rem;
             max-height: 32rem;
-            backdrop-filter: blur(32px);
+            backdrop-filter: blur(0px);
             max-width: 600px;
         }
         .server-item:hover {
@@ -701,9 +704,9 @@
         .mc-strikethrough { text-decoration: line-through; }
         .mc-obfuscated { animation: flashOpacity 0.1s infinite; }
         @keyframes flashOpacity {
-            0%   { opacity: 1; filter:blur(1px); }
-            50% { opacity: 0.5; filter:blur(2px); }
-            100%   { opacity: 1; filter:blur(1px); }
+            0%   { opacity: 1; filter:blur(0px); }
+            50% { opacity: 0.5; filter:blur(1px); }
+            100%   { opacity: 1; filter:blur(0px); }
         }
 
     </style>
