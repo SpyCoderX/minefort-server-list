@@ -139,6 +139,20 @@ async function buildSearch(searchContainerElement,document) {
     tagChecks.forEach(cb => {
         cb.addEventListener('change', initiateSearch);
     });
+    const fullSearchArea = document.getElementById('search-container');
+
+    const observer = new IntersectionObserver(
+    ([e]) => {
+        e.target.classList.toggle('stuck', e.intersectionRatio < 1);
+    },
+    { 
+        threshold: [1],
+        rootMargin: '-13px 0px 0px 0px'
+     }
+    );
+
+    observer.observe(fullSearchArea);
+
 }
 
 function changeVersion(selectTypeElement) {
@@ -633,6 +647,8 @@ async function minefortOnLoad(serverListElement, aboutElement, update, filter={}
                     });
                 });
             });
+
+            document.querySelector(".search-results").innerHTML = `<span class="mc-color-7">Found ${serverListElement.querySelectorAll('.server-item').length} servers</span>`;
         } catch (e) {
             serverListElement.innerHTML = '<div class="mc-color-c server-list-info">Failed to load servers.</div>';
             console.error('Error loading servers:', e);

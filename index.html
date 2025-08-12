@@ -484,17 +484,17 @@
 
         .search-field {
             border-radius: 8px;
-            background-color: rgba(100,100,255,0.2);
+            background-color: rgba(78, 103, 185, 0.4);
             color: white;
             width: 50%;
-            padding: 10px;
+            padding: 5px;
             font-size: 20px;
             border-color: rgba(255,255,255,0.1);
             border-width: 1px;
             transition: background-color 0.1s;
         }
         .search-field:hover {
-            background-color: rgba(100,100,255,0.4);
+            background-color: rgba(100, 141, 255, 0.4);
         }
         .search-field:focus {
             background-color: rgba(100,150,255,0.4);
@@ -504,7 +504,7 @@
         }
         .search-button {
             border-radius: 8px;
-            padding: 10px;
+            padding: 5px;
             font-size: 20px;
             background-color: rgba(100,150,255,0.4);
             color:white;
@@ -521,17 +521,34 @@
             background-color: rgba(100,255,255,0.6);
         }
         .search-core {
-            margin: 5px;
+            margin: 2px;
         }
         #search-container {
-            margin: 10px;
+            margin: 5px;
             background-color: rgba(100,150,255,0.2);
-            padding: 15px 5px;
+            padding: 5px 5px;
             border-radius: 15px;
             border-color: rgba(255,255,255,0.1);
             border-width: 1px;
             border-style: solid;
             box-shadow: 0 0 16px 0 rgba(255,255,255,0.1);
+            position: sticky;
+            top: 11px;
+            z-index: 5;
+            backdrop-filter: blur(1px);
+            transition: background-color 0.1s, box-shadow 0.2s;
+        }
+        #search-container.stuck {
+            background-color: rgba(32, 61, 124, 0.678);
+            box-shadow: 
+                0 0 16px 0 rgba(255,255,255,0.1), 
+                inset 0 0 32px 0 rgba(0,0,0,0.3);
+        }
+        #search-container h2 {
+            transition: margin 0.2s;
+        }
+        #search-container.stuck h2 {
+            margin: 4px 0;
         }
         .search-filters {
             display: flex;
@@ -615,6 +632,10 @@
             display: block;
             max-height: 400px;
             opacity: 1;
+        }
+        .search-results {
+            margin-top: 5px;
+            font-size: large;
         }
 
 
@@ -756,9 +777,8 @@
                 <input type="text" class="search-field" placeholder="Generic Gens #144..."/>
                 <input type="button" value="Search" class="search-button"/>
             </div>
-            <div class="search-filters">
-                
-            </div>
+            <div class="search-filters"><!-- Will be filled by JavaScript --></div>
+            <div class="search-results"><!-- Will be filled by JavaScript --></div>
         </div>
 
         <div class="server-list" id="server-list">
