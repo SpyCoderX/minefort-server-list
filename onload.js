@@ -200,7 +200,7 @@ const glowColorsHover = rawColorValues.map(color => `rgba(${color.map(a => a*2).
 const glowColorsLegend = rawColorValues.map(color => `rgba(${color.map(a => a*2).join(",")}, 0.40)`);
 const fullColors = rawColorValues.map(color => `rgba(${color.map(a => a*2).join(",")}, 1)`);
 
-function buildLegend(legendElement,serverElement,customStyle) {
+function buildLegend(legendElement,serverElement,customStyle, viewCounterElement) {
     if (!legendElement) {
         console.error('Legend element not found.');
         return;
@@ -267,6 +267,10 @@ function buildLegend(legendElement,serverElement,customStyle) {
                 inset 0 0 16px 2px ${glowColor};
             }`
     }).join('');
+    (async () => {
+        viewCount = await (await fetch("https://minefort-server-list-backend.onrender.com/api/stats/views")).json();
+        viewCounterElement.innerHTML = viewCount[0]['val'];
+    })();
 }
 const normal_text = "abcdefghijklmnopqrstuvwxyz";
 const small_caps = "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘǫʀsᴛᴜᴠᴡxʏᴢ";

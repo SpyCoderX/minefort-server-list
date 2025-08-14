@@ -735,6 +735,7 @@
 <body>
     <div class="glass-container">
         <h1>Minefort Server List</h1>
+        <p class="view-counter">This website has been seen <span id="view-count" class="mc-color-9"><span class="dot-fade"><z>.</z><z>.</z><z>.</z></span></span></span> times.</p>
         <div class="info">
             <div class="about" id="about">
                 <div class="about-stats">
@@ -744,7 +745,7 @@
                     <br>
                     <div class="about-players">
                         <span class="about-total">Players <span class="players-total mc-color-9"><span class="dot-fade"><z>.</z><z>.</z><z>.</z></span></span></span><br>
-                        Premium <span class="players-java mc-color-9"><span class="dot-fade"><z>.</z><z>.</z><z>.</z></span></span><br>
+                        Java <span class="players-java mc-color-9"><span class="dot-fade"><z>.</z><z>.</z><z>.</z></span></span><br>
                         Bedrock <span class="players-bedrock mc-color-9"><span class="dot-fade"><z>.</z><z>.</z><z>.</z></span></span><br>
                         Cracked <span class="players-cracked mc-color-9"><span class="dot-fade"><z>.</z><z>.</z><z>.</z></span></span><br>
                         Unknown <span class="players-unknown mc-color-c"><span class="dot-fade"><z>.</z><z>.</z><z>.</z></span></span>
@@ -792,7 +793,7 @@
       
       window.addEventListener('DOMContentLoaded', function() {
         if (typeof minefortOnLoad === 'function') {
-            buildLegend(document.getElementById('plan-legend'),document.getElementById('about-servers'),document.getElementById('custom'))
+            buildLegend(document.getElementById('plan-legend'),document.getElementById('about-servers'),document.getElementById('custom'),document.getElementById('view-count'))
             document.querySelectorAll('.plan-legend-item').forEach(item => {
                 item.addEventListener('click', () => {
                     item.classList.toggle('active');
