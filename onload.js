@@ -227,7 +227,7 @@ function buildLegend(legendElement,serverElement,customStyle, viewCounterElement
     }).join("");
     serverElement.innerHTML += Object.entries(plans).map(([key,name], index) => {
         const color = fullColors[index] || 'rgba(0,0,0,1)';
-        return `${name.split(" ")[0]} <span class="servers-${name.split(" ")[0]} " style="color: ${color}; text-shadow: 0 0 8px ${color}, 0 0 4px ${color};"><span class="dot-fade"><z>.</z><z>.</z><z>.</z></span></span><br>`
+        return `${name.split(" ")[0]} <span class="servers-${name.split(" ")[0]} " style="color: ${color}; text-shadow: 0 0 8px ${color.replace('1)',"var(--glow-power))")}, 0 0 4px ${color.replace('1)',"var(--glow-power))")};"><span class="dot-fade"><z>.</z><z>.</z><z>.</z></span></span><br>`
     }).join("");
     customStyle.innerHTML = Array.from(tags.entries()).map(([key,val]) => {
         return `.tag-${key} {
@@ -537,13 +537,13 @@ async function minefortOnLoad(serverListElement, aboutElement, update, filter={}
             aboutElement.querySelector('.servers-total').innerHTML = total_servers;
 
             aboutElement.querySelector('.players-total').innerHTML = total_players;
-            aboutElement.querySelector('.players-java').innerHTML = `${java_players} (${Math.round(java_players/total_players*1000)/10}%)`;
-            aboutElement.querySelector('.players-bedrock').innerHTML = `${bedrock_players} (${Math.round(bedrock_players/total_players*1000)/10}%)`;
-            aboutElement.querySelector('.players-cracked').innerHTML = `${cracked_players} (${Math.round(cracked_players/total_players*1000)/10}%)`;
-            aboutElement.querySelector('.players-unknown').innerHTML = `${unknown_players} (${Math.round(unknown_players/total_players*1000)/10}%)`;
+            aboutElement.querySelector('.players-java').innerHTML = `${java_players} (${Math.round(java_players/total_players*100)}%)`;
+            aboutElement.querySelector('.players-bedrock').innerHTML = `${bedrock_players} (${Math.round(bedrock_players/total_players*100)}%)`;
+            aboutElement.querySelector('.players-cracked').innerHTML = `${cracked_players} (${Math.round(cracked_players/total_players*100)}%)`;
+            aboutElement.querySelector('.players-unknown').innerHTML = `${unknown_players} (${Math.round(unknown_players/total_players*100)}%)`;
 
             Object.entries(plans).forEach(([key,name]) => {
-                aboutElement.querySelector(`.servers-${name.split(" ")[0]}`).innerHTML = `${servers_to_plan.get(parseInt(key))} (${Math.round(servers_to_plan.get(parseInt(key))/total_servers*1000)/10}%)`;
+                aboutElement.querySelector(`.servers-${name.split(" ")[0]}`).innerHTML = `${servers_to_plan.get(parseInt(key))} (${Math.round(servers_to_plan.get(parseInt(key))/total_servers*100)}%)`;
             });
             if (update) {
                 let filteredServers = servers.filter(filterServerItem);

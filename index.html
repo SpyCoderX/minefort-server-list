@@ -137,7 +137,7 @@
             max-height: fit-content;
             position: relative;
             height: fit-content; /* or whatever height you want */
-            flex-direction: row;
+            flex-direction: column;
             align-items: center;
             justify-content: space-between;
             text-align: center;
@@ -149,17 +149,17 @@
 
         /* Left column (servers/players) */
         .about-stats {
+            display: flex;
+            flex-direction: row;
+            gap: 5%;
             text-align: left;
-            padding-left: 2rem;
-            width: 25%;
+            justify-content: center;
+            width: 100%;
         }
 
         /* Right column (version/creator) */
-        .about-info {
-            text-align: right;
-            padding-right: 2rem;
-            width: 25%;
-        }
+        /* .about-info {
+        } */
 
         /* Optional: make numbers monospace to avoid text shift */
         .about-stats span,
@@ -189,13 +189,13 @@
             width: 100%;
             text-align: center;
             margin: 10px;
-            text-shadow: 0 0 8px rgba(255,255,255,0.3);
+            text-shadow: 0 0 8px rgba(255,255,255,0.15);
         }
         h1 {
             font-size: 2.5rem;
             margin-bottom: 1rem;
             color: #f3f4f6;
-            text-shadow: 0 0 16px rgba(255,255,255,0.6);
+            text-shadow: 0 0 16px rgba(255,255,255,0.3);
         }
         .server-list {
             margin-top: 2.5rem;
@@ -286,7 +286,7 @@
             text-overflow: ellipsis;
             overflow-x: hidden;
             white-space: nowrap;
-            text-shadow: 0 0 5px rgba(255,255,255,1);
+            text-shadow: 0 0 5px rgba(255,255,255,0.5);
             cursor: default;
             transition: filter 0.3s;
         }
@@ -327,7 +327,7 @@
             flex-direction: column;
             justify-content: flex-start;
             overflow: hidden;
-            text-shadow: 0 0 8px rgba(255,255,255,0.8), 0 0 16px rgba(255,255,255,0.6);
+            text-shadow: 0 0 8px rgba(255,255,255,0.4), 0 0 16px rgba(255,255,255,0.3);
             scrollbar-width: 0;
         }
         .server-bottom {
@@ -641,9 +641,9 @@
 
 
         :root {
-            --glow-power: 0.6;
-            --glow-power-low: 0.4;
-            --glow-power-lower: 0.2;
+            --glow-power: 0.3;
+            --glow-power-low: 0.2;
+            --glow-power-lower: 0.1;
         }
         .glow-2 {
             text-shadow: 0 0 8px rgba(255,255,255,var(--glow-power)), 0 0 16px rgba(255,255,255,var(--glow-power-low));
@@ -742,7 +742,6 @@
                     <div class="about-servers" id="about-servers">
                         <span class="about-total">Servers <span class="servers-total mc-color-9"><span class="dot-fade"><z>.</z><z>.</z><z>.</z></span></span></span><br>
                     </div>
-                    <br>
                     <div class="about-players">
                         <span class="about-total">Players <span class="players-total mc-color-9"><span class="dot-fade"><z>.</z><z>.</z><z>.</z></span></span></span><br>
                         Java <span class="players-java mc-color-9"><span class="dot-fade"><z>.</z><z>.</z><z>.</z></span></span><br>
@@ -750,9 +749,8 @@
                         Cracked <span class="players-cracked mc-color-9"><span class="dot-fade"><z>.</z><z>.</z><z>.</z></span></span><br>
                         Unknown <span class="players-unknown mc-color-c"><span class="dot-fade"><z>.</z><z>.</z><z>.</z></span></span>
                     </div>
-                    <br>
-                    <a href="/minefort-server-list/stats" class="mc-color-b">More stats</a>
                 </div>
+                <a href="/minefort-server-list/stats" class="mc-color-b">More stats</a>
                 <div class="about-text">
                     <p>This is an improved Minefort server list.</p>
                     <p>It includes features like MOTDs, player counts, and version!</p>
