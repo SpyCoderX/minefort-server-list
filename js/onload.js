@@ -200,35 +200,35 @@ const glowColorsHover = rawColorValues.map(color => `rgba(${color.map(a => a*2).
 const glowColorsLegend = rawColorValues.map(color => `rgba(${color.map(a => a*2).join(",")}, 0.40)`);
 const fullColors = rawColorValues.map(color => `rgba(${color.map(a => a*2).join(",")}, 1)`);
 
-function buildLegend(legendElement,serverElement,customStyle, viewCounterElement) {
-    if (!legendElement) {
-        console.error('Legend element not found.');
-        return;
-    }
-    legendElement.innerHTML = Object.entries(plans).map(([key, name], index) => {
-        const color = planColors[index] || 'rgba(0,0,0,0.1)';
-        return `<div class="plan-legend-wrapper"><div class="plan-legend-item" style="background: ${color}; box-shadow: 0 4px 16px 0 rgba(0,0,0,0.50), 0 0 0 1px rgba(255,255,255,0.30), inset 0 0 8px 2px ${glowColorsLegend[index]}, inset 0 0 32px 4px ${glowColorsLegend[index]};">
-            <h3 class="plan-name">${name}</h3>
-            <div class="plan-details">
-            <div class="plan-left">
-            <span class="plan-cost">Cost:</span>
-            <span class="plan-ram">RAM:</span>
-            <span class="plan-storage">Storage:</span>
-            <span class="plan-backups">Backups:</span>
-            </div>
-            <div class="plan-right">
-            <span class="plan-cost-value">$${plan_costs[index]}</span>
-            <span class="plan-ram-value">${plan_ram[index]} GB</span>
-            <span class="plan-storage-value">${plan_storage[index]} GB</span>
-            <span class="plan-backups-value">${plan_backups[index]}</span>
-            </div>
-            </div>
-        </div></div>`;
-    }).join("");
-    serverElement.innerHTML += Object.entries(plans).map(([key,name], index) => {
-        const color = fullColors[index] || 'rgba(0,0,0,1)';
-        return `${name.split(" ")[0]} <span class="servers-${name.split(" ")[0]} " style="color: ${color}; text-shadow: 0 0 8px ${color.replace('1)',"var(--glow-power))")}, 0 0 4px ${color.replace('1)',"var(--glow-power))")};"><span class="dot-fade"><z>.</z><z>.</z><z>.</z></span></span><br>`
-    }).join("");
+function buildLegend(customStyle, viewCounterElement) {
+    // if (!legendElement) {
+    //     console.error('Legend element not found.');
+    //     return;
+    // }
+    // legendElement.innerHTML = Object.entries(plans).map(([key, name], index) => {
+    //     const color = planColors[index] || 'rgba(0,0,0,0.1)';
+    //     return `<div class="plan-legend-wrapper"><div class="plan-legend-item" style="background: ${color}; box-shadow: 0 4px 16px 0 rgba(0,0,0,0.50), 0 0 0 1px rgba(255,255,255,0.30), inset 0 0 8px 2px ${glowColorsLegend[index]}, inset 0 0 32px 4px ${glowColorsLegend[index]};">
+    //         <h3 class="plan-name">${name}</h3>
+    //         <div class="plan-details">
+    //         <div class="plan-left">
+    //         <span class="plan-cost">Cost:</span>
+    //         <span class="plan-ram">RAM:</span>
+    //         <span class="plan-storage">Storage:</span>
+    //         <span class="plan-backups">Backups:</span>
+    //         </div>
+    //         <div class="plan-right">
+    //         <span class="plan-cost-value">$${plan_costs[index]}</span>
+    //         <span class="plan-ram-value">${plan_ram[index]} GB</span>
+    //         <span class="plan-storage-value">${plan_storage[index]} GB</span>
+    //         <span class="plan-backups-value">${plan_backups[index]}</span>
+    //         </div>
+    //         </div>
+    //     </div></div>`;
+    // }).join("");
+    // serverElement.innerHTML += Object.entries(plans).map(([key,name], index) => {
+    //     const color = fullColors[index] || 'rgba(0,0,0,1)';
+    //     return `${name.split(" ")[0]} <span class="servers-${name.split(" ")[0]} " style="color: ${color}; text-shadow: 0 0 8px ${color.replace('1)',"var(--glow-power))")}, 0 0 4px ${color.replace('1)',"var(--glow-power))")};"><span class="dot-fade"><z>.</z><z>.</z><z>.</z></span></span><br>`
+    // }).join("");
     customStyle.innerHTML = Array.from(tags.entries()).map(([key,val]) => {
         return `.tag-${key} {
             background: linear-gradient(to right,rgba(${val.join(',')},0.8),rgba(100,100,100,0.5));
@@ -242,29 +242,8 @@ function buildLegend(legendElement,serverElement,customStyle, viewCounterElement
         const glowColor = glowColorsHover[index];
         const hover = planColorsHover[index];
         return `.server-item-${name.split(' ')[0]} {
-              background: ${color};
-              border-radius: 12px;
-              padding: 1.2rem 1.1rem 1.1rem 1.1rem;
-              box-shadow: 0 4px 16px 0 rgba(0,0,0,0.18), 0 0 0 1px rgba(255,255,255,0.08), inset 0 0 8px 2px rgba(255,255,255,0.13), inset 0 0 32px 4px rgba(80,180,255,0.08);
-              display: flex;
-              flex-direction: column;
-              position: relative;
-              text-align: left;
-              transition: box-shadow 0.2s, transform 0.2s, background 0.2s;
-              overflow: visible;
-              box-shadow:
-                0 4px 16px 0 rgba(0,0,0,0.18),
-                0 0 0 1px rgba(255,255,255,0.08),
-                inset 0 0 8px 8px rgba(0,0,0,0.1),
-                inset 0 0 16px 24px rgba(0,0,0,0.05);
-            }
-            .server-item-${name.split(' ')[0]}:hover {
-              background: ${hover};
-              box-shadow:
-                0 8px 16px 4px rgba(0,0,0,0.26),
-                0 0 0 1px rgba(255,255,255,0.08),
-                inset 0 0 4px 0px ${glowColor},
-                inset 0 0 16px 2px ${glowColor};
+              background-image: url("media/Server_Layout-${name.split(' ')[0]}.png");
+            
             }`
     }).join('');
     (async () => {
@@ -411,7 +390,7 @@ async function minefortOnLoad(serverListElement, aboutElement, update, filter={}
         return out;
     }
     function createPlayer(player) {
-        return `<div class="player-icon ${(!player.name)?"broken":""} updated-player" data-name="${purify(player.name) || 'Error loading username'}" data-uuid="${purify(player.uuid)}"><img class="empty-icon" src="empty.png" width="24" height="24"/><img class="actual-icon" src="https://avatars.minefort.com/avatar/${purify(player.uuid)}" width="24" height="24" alt="${purify(player.uuid)}" class="player-avatar" /></div>`;
+        return `<div class="player-icon ${(!player.name)?"broken":""} updated-player" data-name="${purify(player.name) || 'Error loading username'}" data-uuid="${purify(player.uuid)}"><img class="empty-icon" src="empty.png" width="16" height="16"/><img class="actual-icon" src="https://avatars.minefort.com/avatar/${purify(player.uuid)}" width="16" height="16" class="player-avatar" /></div>`;
     }
 
     function createServerItem(server) {
@@ -428,40 +407,36 @@ async function minefortOnLoad(serverListElement, aboutElement, update, filter={}
         
         const planTier = planIndex !== -1 ? planIndex : 0;
         // Plan expandable in glassmorphic div, button themed, section glassy
-        const iconImg = icon.image ? `<img src="${icon.image}" style="width: 32px; height: 32px; padding: 5px; box-shadow: 0 2px 4px 2px rgba(0,0,0,0.3);" alt="icon" />` : '';
-        const topRow = `<div class="server-top">
-            ${iconImg}
-            <span class="server-name">${serverName}</span>
-        </div>`;
-        const motdSection = `<div class="motd-glass">
+        // const iconImg = icon.image ? `<img src="${icon.image}" style="width: 32px; height: 32px; padding: 5px; box-shadow: 0 2px 4px 2px rgba(0,0,0,0.3);" alt="icon" />` : '';
+        const topRow = `<span class="server-name">${serverName}</span>`;
+        const motdSection = `<div class="motd">
             <span>${colorizeMotd(motd)}</span>
         </div>`;
-        const playerList = players.online > 0 ? `<div class="player-list">
-            ${players.list.map(createPlayer).join('')}
-        </div>` : "";
-        
+        const playerList = `<span class="player-list-container">
+        <span class="glow-2" style="font-weight:600;font-size:1em;"><span class="online-players">${players.online ?? '?'}</span> <span class="glow-3 mc-color-7">/ ${players.max ?? '?'}</span></span>
+        <span class="player-list">
+            ${players.list.slice(0,6).map(createPlayer).join('')}
+        </span></span>`;
+
         const strippedMotd = stripMotd(motd).toLowerCase();
-        let resolvedTags = Array.from(tags.keys()).filter(key =>  strippedMotd.includes(key.toString().toLowerCase()) || serverName.toLowerCase().includes(key.toString().toLowerCase()));
-        const tagList = resolvedTags.length > 0 ? `<div class="tag-list">
-            ${resolvedTags.map(key => `<div class="server-tag tag-${key}">${key}</div>`).join('')}
-        </div>` : "";
-        const copyIpBtn = `<button class="copy-ip-btn" title="Copy IP">Copy IP</button>`//<svg style="filter: drop-shadow(0px 0px 4px rgba(255,255,255, 1));" width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M208 0L332.1 0c12.7 0 24.9 5.1 33.9 14.1l67.9 67.9c9 9 14.1 21.2 14.1 33.9L448 336c0 26.5-21.5 48-48 48l-192 0c-26.5 0-48-21.5-48-48l0-288c0-26.5 21.5-48 48-48zM48 128l80 0 0 64-64 0 0 256 192 0 0-32 64 0 0 48c0 26.5-21.5 48-48 48L48 512c-26.5 0-48-21.5-48-48L0 176c0-26.5 21.5-48 48-48z"/></svg></button>`;
+        // let resolvedTags = Array.from(tags.keys()).filter(key =>  strippedMotd.includes(key.toString().toLowerCase()) || serverName.toLowerCase().includes(key.toString().toLowerCase()));
+        // const tagList = resolvedTags.length > 0 ? `<div class="tag-list">
+        //     ${resolvedTags.map(key => `<div class="server-tag tag-${key}">${key}</div>`).join('')}
+        // </div>` : "";
+        const copyIpBtn = `<button class="copy-ip-btn" title="Copy IP">IP</button>`//<svg style="filter: drop-shadow(0px 0px 4px rgba(255,255,255, 1));" width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M208 0L332.1 0c12.7 0 24.9 5.1 33.9 14.1l67.9 67.9c9 9 14.1 21.2 14.1 33.9L448 336c0 26.5-21.5 48-48 48l-192 0c-26.5 0-48-21.5-48-48l0-288c0-26.5 21.5-48 48-48zM48 128l80 0 0 64-64 0 0 256 192 0 0-32 64 0 0 48c0 26.5-21.5 48-48 48L48 512c-26.5 0-48-21.5-48-48L0 176c0-26.5 21.5-48 48-48z"/></svg></button>`;
         const bottomRow = `<div class="server-bottom">
-            <div>
-                <span class="glow-2" style="font-weight:600;font-size:1em;">${versionType}</span>
-                ${versionNum ? `<span class="glow-3" style="font-size:0.97em;color:#b0b3b8;">${versionNum}</span>` : ''}
-            </div>
-            ${copyIpBtn}
-            <div class="glow-2" style="font-weight:600;font-size:1em;"><p><span class="online-players">${players.online ?? '?'}</span> <span class="glow-3 mc-color-7">/ ${players.max ?? '?'}</span></p></div>
+            <span class="glow-2" style="font-weight:600;font-size:1em;">${versionType}</span>
+            ${versionNum ? `<span class="glow-3" style="font-size:0.97em;color:#b0b3b8;">${versionNum}</span>` : ''}
         </div>`;
-        
+        const endButtons = `<div class="end-buttons">${copyIpBtn}<button class="mc-color-7 mc-strikethrough" title="Coming soon">More</button></div>`;
+
         return `
           <div class="server-item server-item-${plans[planKey].split(' ')[0]} updated-server" data-plan-tier="${planTier}" data-player-count="${players.online}">
             ${topRow}
             ${motdSection}
             ${playerList}
-            ${tagList}
             ${bottomRow}
+            ${endButtons}
           </div>
         `;
     }
@@ -534,17 +509,17 @@ async function minefortOnLoad(serverListElement, aboutElement, update, filter={}
                 const max = server.players.max;
                 servers_to_plan.set(max,servers_to_plan.get(max)+1);
             });
-            aboutElement.querySelector('.servers-total').innerHTML = total_servers;
+            // aboutElement.querySelector('.servers-total').innerHTML = total_servers;
 
-            aboutElement.querySelector('.players-total').innerHTML = total_players;
-            aboutElement.querySelector('.players-java').innerHTML = `${java_players} (${Math.round(java_players/total_players*100)}%)`;
-            aboutElement.querySelector('.players-bedrock').innerHTML = `${bedrock_players} (${Math.round(bedrock_players/total_players*100)}%)`;
-            aboutElement.querySelector('.players-cracked').innerHTML = `${cracked_players} (${Math.round(cracked_players/total_players*100)}%)`;
-            aboutElement.querySelector('.players-unknown').innerHTML = `${unknown_players} (${Math.round(unknown_players/total_players*100)}%)`;
+            // aboutElement.querySelector('.players-total').innerHTML = total_players;
+            // aboutElement.querySelector('.players-java').innerHTML = `${java_players} (${Math.round(java_players/total_players*100)}%)`;
+            // aboutElement.querySelector('.players-bedrock').innerHTML = `${bedrock_players} (${Math.round(bedrock_players/total_players*100)}%)`;
+            // aboutElement.querySelector('.players-cracked').innerHTML = `${cracked_players} (${Math.round(cracked_players/total_players*100)}%)`;
+            // aboutElement.querySelector('.players-unknown').innerHTML = `${unknown_players} (${Math.round(unknown_players/total_players*100)}%)`;
 
-            Object.entries(plans).forEach(([key,name]) => {
-                aboutElement.querySelector(`.servers-${name.split(" ")[0]}`).innerHTML = `${servers_to_plan.get(parseInt(key))} (${Math.round(servers_to_plan.get(parseInt(key))/total_servers*100)}%)`;
-            });
+            // Object.entries(plans).forEach(([key,name]) => {
+            //     aboutElement.querySelector(`.servers-${name.split(" ")[0]}`).innerHTML = `${servers_to_plan.get(parseInt(key))} (${Math.round(servers_to_plan.get(parseInt(key))/total_servers*100)}%)`;
+            // });
             if (update) {
                 let filteredServers = servers.filter(filterServerItem);
                 const serverItems = new Map(Array.from(serverListElement.querySelectorAll('.server-item')).map(item => [item,item.getBoundingClientRect()]));
@@ -561,11 +536,9 @@ async function minefortOnLoad(serverListElement, aboutElement, update, filter={}
                     playerCount.innerHTML = thisServer.players.online;
                     item.setAttribute('data-player-count',thisServer.players.online);
                     const playerList = item.querySelector('.player-list');
-                    let players = thisServer.players.list;
+                    let players = thisServer.players.list.splice(0,6);
                     if (playerList) {
-                        if (players.length === 0) {
-                            playerList.remove();
-                        } else {
+                        if (players.length !== 0) {
                             Array.from(playerList.children).forEach(icon => {
                                 const uuid = icon.getAttribute('data-uuid');
                                 const thisPlayer = players.filter(pl => pl.uuid === uuid)[0];
@@ -652,7 +625,7 @@ async function minefortOnLoad(serverListElement, aboutElement, update, filter={}
                 });
             });
 
-            document.querySelector(".search-results").innerHTML = `<span class="mc-color-7">Found ${serverListElement.querySelectorAll('.server-item').length} servers</span>`;
+            // document.querySelector(".search-results").innerHTML = `<span class="mc-color-7">Found ${serverListElement.querySelectorAll('.server-item').length} servers</span>`;
         } catch (e) {
             serverListElement.innerHTML = '<div class="mc-color-c server-list-info">Failed to load servers.</div>';
             console.error('Error loading servers:', e);
