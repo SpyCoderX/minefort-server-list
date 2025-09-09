@@ -1,6 +1,6 @@
 @font-face {
     font-family: monocraft;
-    src: url(/media/Monocraft.ttc);
+    src: url(../media/Monocraft.ttc);
 }
 * {
     font-family: monocraft;
@@ -10,7 +10,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-image: url("media/16x16-Foreground.png");
+    background-image: url("../media/16x16-Foreground.png");
     image-rendering: pixelated;
     background-attachment: fixed;
     background-size: 64px 64px;
@@ -39,7 +39,7 @@ code {
 }
 
 .container {
-    background-image: url(media/16x16-Background.png); /*rgba(0,0,0, 0.2);*/
+    background-image: url(../media/16x16-Background.png); /*rgba(0,0,0, 0.2);*/
     image-rendering: pixelated;
     background-attachment: local;
     background-position-x: left;
@@ -57,7 +57,7 @@ site-header {
     padding: 0;
 }
 .header {
-    background-image: url(media/Wood.png);
+    background-image: url(../media/Wood.png);
     image-rendering: pixelated;
     background-attachment: local;
     background-position-x: left;
