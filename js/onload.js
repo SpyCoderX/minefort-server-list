@@ -5,9 +5,22 @@ const antiXSS = new Map([
     ["'", '&#x27;'],
     ['"','&quot;']
 ]);
+const antiSwear = new Map([
+    ["f"+"u"+"c"+"k","f###"],
+    ["s"+"h"+"i"+"t","s###"],
+    ["b"+"i"+"t"+"c"+"h","b###"],
+    ["a"+"s"+"s"+"h"+"o"+"l"+"e","a######"],
+    ["d"+"i"+"c"+"k","d###"],
+    ["p"+"u"+"s"+"s"+"y","p###"]
+]);
 
 function purify(string) {
     if (string == null) return null;
+    for (const [bad, good] of antiSwear) {
+        const regex = new RegExp(bad, 'gi');
+        string = string.replace(regex, good);
+    }
+
     let out = '';
     for (let i = 0; i < string.length; i++) {
         const char = string[i];
@@ -319,25 +332,29 @@ async function minefortOnLoad(serverListElement, aboutElement, update, filter={}
     
 
     
-
+    const colorMap = {
+        '0': 'mc-color-0', '1': 'mc-color-1', '2': 'mc-color-2', '3': 'mc-color-3',
+        '4': 'mc-color-4', '5': 'mc-color-5', '6': 'mc-color-6', '7': 'mc-color-7',
+        '8': 'mc-color-8', '9': 'mc-color-9', 'a': 'mc-color-a', 'b': 'mc-color-b',
+        'c': 'mc-color-c', 'd': 'mc-color-d', 'e': 'mc-color-e', 'f': 'mc-color-f'
+    };
+    const formatMap = {
+        'l': 'mc-bold', 'o': 'mc-italic', 'n': 'mc-underline', 'm': 'mc-strikethrough', 'k' : 'mc-obfuscated'
+    };
     // Colorize Minecraft MOTD (&-codes)
     function colorizeMotd(motd) {
         if (!motd) return '';
         motd = purify(motd);
-        const colorMap = {
-            '0': 'mc-color-0', '1': 'mc-color-1', '2': 'mc-color-2', '3': 'mc-color-3',
-            '4': 'mc-color-4', '5': 'mc-color-5', '6': 'mc-color-6', '7': 'mc-color-7',
-            '8': 'mc-color-8', '9': 'mc-color-9', 'a': 'mc-color-a', 'b': 'mc-color-b',
-            'c': 'mc-color-c', 'd': 'mc-color-d', 'e': 'mc-color-e', 'f': 'mc-color-f'
-        };
-        const formatMap = {
-            'l': 'mc-bold', 'o': 'mc-italic', 'n': 'mc-underline', 'm': 'mc-strikethrough', 'k' : 'mc-obfuscated'
-        };
         let openTags = [];
         let out = '';
         let i = 0;
         while (i < motd.length) {
             if ((motd[i] === '&' || motd[i] === '§') && i + 1 < motd.length) {
+                if (motd[i + 2] === ";" || motd[i + 3] === ";" || motd[i + 4] === ";" || motd[i + 5] === ";") {
+                    out += motd[i];
+                    i++;
+                    continue;
+                }
                 const code = motd[i + 1].toLowerCase();
                 if (colorMap[code]) {
                     // Close all open tags
@@ -378,8 +395,10 @@ async function minefortOnLoad(serverListElement, aboutElement, update, filter={}
         for (let index = 0; index < motd.length; index++) {
             const element = motd[index];
             if (element === "&" || element === "§") {
-                index++;
-                continue;
+                if (motd[index+2] !== ";") {
+                    index++;
+                    continue;
+                } 
             }
             if (small_caps.includes(element)) {
                 out += normal_text[small_caps.indexOf(element)]
