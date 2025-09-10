@@ -10,7 +10,7 @@
     body {
         font-family: monospace;
         background: linear-gradient(135deg, #080808 0%, #0d1011 100%);
-        background-image: url("background.png");
+        background-image: url("media/background.png");
         background-attachment: fixed;
         background-position-x: center;
         color: white;
@@ -26,7 +26,7 @@
     }
 
     .container {
-        background-image: url("background_blurred.png"); /*rgba(0,0,0, 0.2);*/
+        background-image: url("media/background_blurred.png"); /*rgba(0,0,0, 0.2);*/
         background-attachment: fixed;
         background-size: cover;
         background-position-x: center;
@@ -97,7 +97,7 @@
     <h1>Minefort Hourly Stats</h1>
     <div><p class="description">This graph shows the number of players and servers online every hour over the last 7 days.</p></div>
     <div id="loading">Loading<span class="dot-fade"><z>.</z><z>.</z><z>.</z></span></div>
-    <div style="margin-bottom:20px"><a href="/minefort-server-list/" class="mc-color-9">Return to home</a></div>
+    <div style="margin-bottom:20px"><a href="../" class="mc-color-9">Return to home</a></div>
     <div class="chart"><canvas id="playerChart"></canvas></div>
     <div class="chart"><canvas id="serverChart"></canvas></div>
   </div>
