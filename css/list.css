@@ -161,10 +161,8 @@
     grid-auto-rows: 1fr;
     width: 100%;
     gap: 16px;
-    height: 3rem;
     overflow: hidden;
     justify-content: center;
-    min-height: 600px;
     /* align-items: center; */
     transition: height 1s cubic-bezier(0.755, 0.05, 0.855, 0.06);
 

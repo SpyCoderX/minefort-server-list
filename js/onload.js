@@ -619,11 +619,11 @@ async function minefortOnLoad(serverListElement, aboutElement, update, filter={}
 
             } else {
                 serverListElement.innerHTML = servers.filter(filterServerItem).map(createServerItem).join("");
-                serverListElement.style.height = serverListElement.scrollHeight + "px";
-                serverListElement.addEventListener('transitionend', () => {
-                    serverListElement.style.height = "auto"; // Reset height to auto after transition
-                    serverListElement.style.overflow = "visible";
-                });
+                // serverListElement.style.height = serverListElement.scrollHeight + "px";
+                // serverListElement.addEventListener('transitionend', () => {
+                //     serverListElement.style.height = "auto"; // Reset height to auto after transition
+                //     serverListElement.style.overflow = "visible";
+                // });
                 
             }
             
